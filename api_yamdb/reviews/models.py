@@ -1,13 +1,14 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 
+from core.constants import NAME_MAX, SLUG_MAX
 User = get_user_model()
 
 
 class Category(models.Model):
     """Модель категории."""
     name = models.CharField(
-        max_length=256,
+        max_length=NAME_MAX,
         verbose_name='Название',
     )
     slug = models.SlugField(
@@ -27,11 +28,11 @@ class Category(models.Model):
 class Genre(models.Model):
     """Модель жанра."""
     name = models.CharField(
-        max_length=256,
+        max_length=NAME_MAX,
         verbose_name='Название',
     )
     slug = models.SlugField(
-        max_length=50,
+        max_length=SLUG_MAX,
         unique=True,
         verbose_name='Slug'
     )
@@ -47,7 +48,7 @@ class Genre(models.Model):
 class Title(models.Model):
     """Модель произведения."""
     name = models.CharField(
-        max_length=256,
+        max_length=NAME_MAX,
         verbose_name='Название',
     )
     year = models.IntegerField(

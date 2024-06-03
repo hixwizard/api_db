@@ -1,0 +1,2 @@
+NAME_MAX = 256
+SLUG_MAX = 50
