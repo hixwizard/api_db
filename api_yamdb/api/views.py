@@ -1,5 +1,9 @@
 from rest_framework import viewsets
 
+from reviews.models import (
+    Category, Genre, Title, Reviews, Comment
+)
+
 
 class AuthViewSet(viewsets.ModelViewSet):
     pass
@@ -10,20 +14,20 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    pass
+    queryset = Title.objects.all()
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
-    pass
+    queryset = Category.objects.all()
 
 
 class GenreViewSet(viewsets.ModelViewSet):
-    pass
+    queryset = Genre.objects.all()
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
-    pass
+    queryset = Reviews.objects.all()
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-    pass
+    queryset = Comment.objects.all()
