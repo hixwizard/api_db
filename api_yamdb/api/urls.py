@@ -2,17 +2,14 @@ from rest_framework.routers import DefaultRouter
 from django.urls import path, include
 
 from .views import (
-    AuthViewSet, UserViewSet, TitleViewSet, CategoryViewSet,
+    TitleViewSet, CategoryViewSet,
     GenreViewSet, ReviewViewSet, CommentViewSet
 )
 
 router_v1 = DefaultRouter()
 
-# Аутентификация
-router_v1.register('auth', AuthViewSet, basename='auth')
-
 # Пользователи
-router_v1.register('users', UserViewSet, basename='users')
+#router_v1.register('users', UserViewSet, basename='users')
 
 # Произведения
 router_v1.register('titles', TitleViewSet, basename='titles')
@@ -33,4 +30,6 @@ router_v1.register(r'reviews(?P<review_id>\d+)/comments',
 
 urlpatterns = [
     path('v1/', include(router_v1.urls)),
+    path('v1/', include('users.urls')),
+
 ]

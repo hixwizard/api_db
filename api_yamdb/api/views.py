@@ -1,3 +1,4 @@
+from django.core.mail import send_mail # Добавить метод в запрос пользователя на регистрацию
 from rest_framework import viewsets
 
 from reviews.models import (
@@ -9,8 +10,7 @@ class AuthViewSet(viewsets.ModelViewSet):
     pass
 
 
-class UserViewSet(viewsets.ModelViewSet):
-    pass
+# class UserViewSet(viewsets.ModelViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
