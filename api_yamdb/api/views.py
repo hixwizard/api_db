@@ -9,8 +9,7 @@ class AuthViewSet(viewsets.ModelViewSet):
     pass
 
 
-class UserViewSet(viewsets.ModelViewSet):
-    pass
+# class UserViewSet(viewsets.ModelViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
