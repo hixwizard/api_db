@@ -25,7 +25,7 @@ INSTALLED_APPS = [
     'api',
     'reviews',
     'users',
-    'djoser',
+    'djoser', # удаляем, позже
 ]
 
 MIDDLEWARE = [
