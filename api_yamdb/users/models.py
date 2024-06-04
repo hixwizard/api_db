@@ -8,15 +8,17 @@ ADMIN = 'admin'
 MODERATOR = 'moderator'
 
 ROLE_CHOICES = [
-    (USER, USER),
-    (ADMIN, ADMIN),
-    (MODERATOR, MODERATOR),
+    'user',
+    'admin',
+    'moderator',
 ]
 
 
 class UserModel(AbstractUser):
     """Кастомная модель пользователя."""
-    username = models.CharField(max_length=USERNAME_MAX_LENGTH, unique=True)
+    username = models.CharField(
+        max_length=USERNAME_MAX_LENGTH, unique=True
+    )
     email = models.EmailField(max_length=EMAIL_MAX)
     first_name = models.CharField(max_length=USERNAME_MAX_LENGTH)
     last_name = models.CharField(max_length=USERNAME_MAX_LENGTH)
