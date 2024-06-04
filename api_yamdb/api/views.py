@@ -1,4 +1,3 @@
-from django.core.mail import send_mail # Добавить метод в запрос пользователя на регистрацию
 from rest_framework import viewsets
 
 from reviews.models import (
