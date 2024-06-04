@@ -24,10 +24,12 @@ router_v1.register('categories', CategoryViewSet, basename='categories')
 router_v1.register('genres', GenreViewSet, basename='genres')
 
 # Отзывы
-router_v1.register('reviews', ReviewViewSet, basename='reviews')
+router_v1.register(r'titles(?P<title_id>\d+)/reviews',
+                   ReviewViewSet, basename='reviews')
 
 # Комментарии
-router_v1.register('comments', CommentViewSet, basename='comments')
+router_v1.register(r'reviews(?P<review_id>\d+)/comments',
+                   CommentViewSet, basename='comments')
 
 urlpatterns = [
     path('v1/', include(router_v1.urls)),
