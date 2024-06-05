@@ -21,6 +21,14 @@ class UserModel(AbstractUser):
         blank=True
     )
 
+    @property
+    def is_admin(self):
+        return self.role == ROLE_CHOICES['admin']
+
+    @property
+    def is_moderator(self):
+        return self.role == ROLE_CHOICES['moderator']
+
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
