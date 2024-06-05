@@ -19,7 +19,7 @@ class UserModel(AbstractUser):
         'роль',
         max_length=20,
         choices=ROLE_CHOICES_LIST,
-        default=ROLE_CHOICES['user'],
+        default=('user', 'user'),
         blank=True
     )
 
