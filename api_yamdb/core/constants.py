@@ -5,3 +5,12 @@ MIN_CODE = 1000
 MAX_CODE = 9999
 CODE_LENGTH = 4
 EMAIL_MAX = 254
+
+USER = 'user'
+ADMIN = 'admin'
+MODERATOR = 'moderator'
+ROLE_CHOICES = [
+    (USER, USER),
+    (ADMIN, ADMIN),
+    (MODERATOR, MODERATOR),
+]

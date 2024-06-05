@@ -1,17 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-from core.constants import USERNAME_MAX_LENGTH, EMAIL_MAX
-
-USER = 'user'
-ADMIN = 'admin'
-MODERATOR = 'moderator'
-
-ROLE_CHOICES = [
-    'user',
-    'admin',
-    'moderator',
-]
+from core.constants import USERNAME_MAX_LENGTH, EMAIL_MAX, ROLE_CHOICES, USER
 
 
 class UserModel(AbstractUser):
