@@ -59,8 +59,8 @@ class TokenView(views.APIView):
             # Получаем код подтверждения из кэша
             cached_code = cache.get(f'confirmation_code_{email}')
 
-            if cached_code == confirmation_code:
-                user = UserModel.objects.get(email=email)
+            if cached_code == str(confirmation_code):
+                UserModel.objects.get(email=email)
                 tokens = serializer.create(validated_data={'email': email})
                 return Response(tokens, status=status.HTTP_200_OK)
 
