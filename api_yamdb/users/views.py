@@ -5,9 +5,12 @@ from django.core.mail import send_mail
 from .serializers import SignupSerializer, TokenSerializer
 from .models import UserModel
 from core.constants import MIN_CODE, MAX_CODE
+from users.permissions import IsAuthenticatedOrReadOnly
 
 
 class SignupView(views.APIView):
+    permission_classes = (IsAuthenticatedOrReadOnly,)
+
     def post(self, request):
         serializer = SignupSerializer(data=request.data)
         if serializer.is_valid():
