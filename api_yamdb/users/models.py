@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-from core.constants import USERNAME_MAX_LENGTH, EMAIL_MAX, ROLE_CHOICES, USER
+from core.constants import USERNAME_MAX_LENGTH, EMAIL_MAX, ROLE_CHOICES
 
 
 class UserModel(AbstractUser):
@@ -17,7 +17,7 @@ class UserModel(AbstractUser):
         'роль',
         max_length=20,
         choices=ROLE_CHOICES,
-        default=USER,
+        default='user',
         blank=True
     )
 

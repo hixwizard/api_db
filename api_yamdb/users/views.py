@@ -27,8 +27,7 @@ class SignupView(views.APIView):
 
             user, crated = UserModel.objects.get_or_create(
                 username=username,
-                email=email,
-                defaults={'confirmation_code': confirmation_code}
+                email=email
             )
             if not crated:
                 user.confirmation_code = confirmation_code
