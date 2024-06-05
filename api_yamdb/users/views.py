@@ -4,6 +4,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from django.core.mail import send_mail
 from django.core.cache import cache
+
 from .serializers import SignupSerializer, TokenSerializer
 from .models import UserModel
 from core.constants import MIN_CODE, MAX_CODE
@@ -19,17 +20,17 @@ class SignupView(views.APIView):
             username = serializer.validated_data.get('username')
             confirmation_code = str(random.randint(MIN_CODE, MAX_CODE))
 
-            # Сохраняем код подтверждения в кэше
-            cache.set(
-                f'confirmation_code_{email}',
-                confirmation_code, timeout=300
-            )
+            cache_key = f'confirmation_code_{email}'
+            cache.set(cache_key, confirmation_code, timeout=300)
 
-            user, crated = UserModel.objects.get_or_create(
+            user, created = UserModel.objects.get_or_create(
                 username=username,
                 email=email
             )
-            if not crated:
+            if not created:
+                user.confirmation_code = confirmation_code
+                user.save()
+            else:
                 user.confirmation_code = confirmation_code
                 user.save()
             send_mail(
@@ -52,18 +53,21 @@ class TokenView(views.APIView):
         serializer = TokenSerializer(data=request.data)
         if serializer.is_valid():
             email = serializer.validated_data.get('email')
-            confirmation_code = serializer.validated_data.get(
-                'confirmation_code'
+            confirmation_code = str(
+                serializer.validated_data.get('confirmation_code')
             )
-
             # Получаем код подтверждения из кэша
-            cached_code = cache.get(f'confirmation_code_{email}')
-
-            if cached_code == str(confirmation_code):
-                UserModel.objects.get(email=email)
+            cache_key = f'confirmation_code_{email}'
+            cached_code = cache.get(cache_key)
+            if cached_code == confirmation_code:
+                user = UserModel.objects.get(email=email)
                 tokens = serializer.create(validated_data={'email': email})
-                return Response(tokens, status=status.HTTP_200_OK)
 
-            return Response({'error': 'Неверный код подтверждения'},
-                            status=status.HTTP_400_BAD_REQUEST)
+                # Очистка кэша
+                cache.delete(cache_key)
+                return Response(tokens, status=status.HTTP_200_OK)
+            return Response(
+                {'error': 'Неверный код подтверждения'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
