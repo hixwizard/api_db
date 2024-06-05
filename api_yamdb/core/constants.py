@@ -6,8 +6,8 @@ MAX_CODE = 9999
 CODE_LENGTH = 4
 EMAIL_MAX = 254
 
-ROLE_CHOICES = [
-    ('user', 'Пользователь'),
-    ('admin', 'Администратор'),
-    ('moderator', 'Модератор'),
-]
+ROLE_CHOICES = {
+    'user': 'user',
+    'admin': 'admin',
+    'moderator': 'moderator',
+}
