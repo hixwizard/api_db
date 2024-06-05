@@ -1,7 +1,10 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-from core.constants import USERNAME_MAX_LENGTH, EMAIL_MAX, ROLE_CHOICES, USER
+from core.constants import (
+    USERNAME_MAX_LENGTH, EMAIL_MAX,
+    ROLE_CHOICES, USER, ROLE_CHOICES_LIST
+)
 
 
 class UserModel(AbstractUser):
@@ -16,10 +19,18 @@ class UserModel(AbstractUser):
     role = models.CharField(
         'роль',
         max_length=20,
-        choices=ROLE_CHOICES,
+        choices=ROLE_CHOICES_LIST,
         default=USER,
         blank=True
     )
+
+    @property
+    def is_admin(self):
+        return self.role == ROLE_CHOICES['admin']
+
+    @property
+    def is_moderator(self):
+        return self.role == ROLE_CHOICES['moderator']
 
     class Meta:
         verbose_name = 'Пользователь'

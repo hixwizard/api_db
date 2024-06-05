@@ -9,8 +9,9 @@ EMAIL_MAX = 254
 USER = 'user'
 ADMIN = 'admin'
 MODERATOR = 'moderator'
-ROLE_CHOICES = [
-    (USER, USER),
-    (ADMIN, ADMIN),
-    (MODERATOR, MODERATOR),
-]
+ROLE_CHOICES = {
+    'user': 'user',
+    'admin': 'admin',
+    'moderator': 'moderator',
+}
+ROLE_CHOICES_LIST = [(key, value) for key, value in ROLE_CHOICES.items()]
