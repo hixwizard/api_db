@@ -133,3 +133,10 @@ EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
 # User custom model
 
 AUTH_USER_MODEL = 'users.UserModel'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
