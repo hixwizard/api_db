@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import UserModel
-from core.constants import USERNAME_MAX_LENGTH, CODE_LENGTH
+from core.constants import USERNAME_MAX_LENGTH, MAX_CODE
 
 
 class SignupSerializer(serializers.ModelSerializer):
@@ -29,7 +29,7 @@ class SignupSerializer(serializers.ModelSerializer):
 class TokenSerializer(serializers.Serializer):
     """Сериализатор для создания токена аутентификации."""
     email = serializers.EmailField()
-    confirmation_code = serializers.CharField(max_length=CODE_LENGTH)
+    confirmation_code = serializers.IntegerField(max_value=MAX_CODE)
 
     def create(self, validated_data):
         user = UserModel.objects.get(email=validated_data['email'])
