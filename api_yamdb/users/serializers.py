@@ -5,7 +5,7 @@ from .models import UserModel
 from core.constants import USERNAME_MAX_LENGTH, CODE_LENGTH
 
 
-class SignupSerializer(serializers.Serializer):
+class SignupSerializer(serializers.ModelSerializer):
     email = serializers.EmailField()
     username = serializers.CharField(max_length=USERNAME_MAX_LENGTH)
 
@@ -17,7 +17,7 @@ class SignupSerializer(serializers.Serializer):
         return data
 
 
-class TokenSerializer(serializers.Serializer):
+class TokenSerializer(serializers.ModelSerializer):
     username = serializers.CharField(max_length=USERNAME_MAX_LENGTH)
     confifmation_code = serializers.CharField(max_length=CODE_LENGTH)
 
@@ -37,6 +37,6 @@ class TokenSerializer(serializers.Serializer):
         )
         refresh = RefreshToken.for_user(user)
         return {
-            'обновлённый токен': str(refresh),
-            'обновлённый токен доступа': str(refresh.access_token),
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
         }
