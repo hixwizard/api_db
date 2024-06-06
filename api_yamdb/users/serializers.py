@@ -13,7 +13,7 @@ class SignupSerializer(serializers.ModelSerializer):
         regex=r'^[\w.@+-]+$',
         max_length=USERNAME_MAX_LENGTH,
         error_messages={
-            'invalid': 'Имя пользователя должно состоять только из букв, цифр и символов @/./+/-/_'
+            'invalid': 'Имя должно состоять из букв, цифр и символов @/./+/-/_'
         }
     )
 
@@ -24,6 +24,13 @@ class SignupSerializer(serializers.ModelSerializer):
     def validate_username(self, value):
         if value.lower() == 'me':
             raise serializers.ValidationError('Имя "me" уже занято.')
+        return value
+
+    def validate_email(self, value):
+        if len(value) > EMAIL_MAX:
+            raise serializers.ValidationError(
+                'Email не может быть длиннее 254 символов.'
+            )
         return value
 
     def validate(self, data):
