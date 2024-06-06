@@ -18,6 +18,7 @@ class Category(models.Model):
     )
 
     class Meta:
+        ordering = ('id',)
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
 
@@ -38,6 +39,7 @@ class Genre(models.Model):
     )
 
     class Meta:
+        ordering = ('id',)
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
 
@@ -71,6 +73,7 @@ class Title(models.Model):
     )
 
     class Meta:
+        ordering = ('id',)
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
 
@@ -88,6 +91,10 @@ class GenreTitle(models.Model):
         Title,
         on_delete=models.CASCADE,
     )
+
+    class Meta:
+        verbose_name = 'Жанр к произведению'
+        verbose_name_plural = 'Жанр к произведению'
 
 
 class Reviews(models.Model):
@@ -111,7 +118,7 @@ class Reviews(models.Model):
 
     class Meta:
         verbose_name = 'Отзыв'
-        verbose_name = 'Отзывы'
+        verbose_name_plural = 'Отзывы'
 
     def __str__(self) -> str:
         return self.text
