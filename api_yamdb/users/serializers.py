@@ -17,10 +17,11 @@ class SignupSerializer(serializers.ModelSerializer):
     def validate_username(self, value):
         if value.lower() == 'me':
             raise serializers.ValidationError('Имя "me" уже занято.')
+        return value
 
     def validate(self, data):
         if UserModel.objects.filter(email=data['email']).exists():
-            raise serializers.ValidationError('Такая почта уже изпользуется.')
+            raise serializers.ValidationError('Такая почта уже используется.')
         if UserModel.objects.filter(username=data['username']).exists():
             raise serializers.ValidationError('Имя пользователя занято.')
         return data

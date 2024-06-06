@@ -11,17 +11,20 @@ class UserModel(AbstractUser):
     username = models.CharField(
         max_length=USERNAME_MAX_LENGTH, unique=True
     )
-    email = models.EmailField(max_length=EMAIL_MAX)
-    first_name = models.CharField(max_length=USERNAME_MAX_LENGTH)
-    last_name = models.CharField(max_length=USERNAME_MAX_LENGTH)
+    email = models.EmailField(max_length=EMAIL_MAX, unique=True)
+    first_name = models.CharField(max_length=USERNAME_MAX_LENGTH, blank=True)
+    last_name = models.CharField(max_length=USERNAME_MAX_LENGTH, blank=True)
     bio = models.TextField('Биография', blank=True)
     role = models.CharField(
         'роль',
         max_length=20,
         choices=ROLE_CHOICES_LIST,
-        default=('user', 'user'),
+        default=ROLE_CHOICES['user'],
         blank=True
     )
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
 
     @property
     def is_admin(self):
