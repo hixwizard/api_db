@@ -22,33 +22,32 @@ class SignupView(views.APIView):
             email = serializer.validated_data.get('email')
             username = serializer.validated_data.get('username')
             confirmation_code = str(random.randint(MIN_CODE, MAX_CODE))
-
-
             # Сохраняем код подтверждения в кэше
             cache.set(
                 f'confirmation_code_{email}',
                 confirmation_code, timeout=300
             )
-            user, crated = UserModel.objects.get_or_create(
+            user, created = UserModel.objects.get_or_create(
                 username=username,
-                email=email
+                defaults={'email': email}
             )
             if not created:
-                user.confirmation_code = confirmation_code
-                user.save()
-            else:
-                user.confirmation_code = confirmation_code
+                print(f"User already exists. Updating email for user: {user.username}")
+                user.email = email
                 user.save()
             send_mail(
                 'Код подтверждения',
-                f'Ваш код подтверждения {confirmation_code}',
+                f'Ваш код подтверждения: {confirmation_code}',
                 'noreply@example.com',
                 [email],
                 fail_silently=False,
             )
             return Response(
-                {'message': 'Код подтверждения отправлен на указаную почту'},
-                status=status.HTTP_200_OK)
+                {'message': 'Код подтверждения отправлен на указанную почту'},
+                status=status.HTTP_200_OK
+            )
+        else:
+            print(f"Signup serializer errors: {serializer.errors}")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -64,7 +63,8 @@ class TokenView(views.APIView):
                 serializer.validated_data.get('confirmation_code')
             )
             # Получаем код подтверждения из кэша
-            cached_code = cache.get(f'confirmation_code_{email}')
+            cache_key = f'confirmation_code_{email}'
+            cached_code = cache.get(cache_key)
 
             if cached_code == confirmation_code:
                 tokens = serializer.create(validated_data={'email': email})
