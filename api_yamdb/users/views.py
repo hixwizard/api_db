@@ -5,7 +5,6 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
 from rest_framework.viewsets import GenericViewSet
-from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.core.cache import cache
 
@@ -65,7 +64,9 @@ class TokenView(views.APIView):
         serializer = TokenSerializer(data=request.data)
         if serializer.is_valid():
             username = serializer.validated_data.get('username')
-            confirmation_code = serializer.validated_data.get('confirmation_code')
+            confirmation_code = serializer.validated_data.get(
+                'confirmation_code'
+            )
 
             if not username or not confirmation_code:
                 return Response(

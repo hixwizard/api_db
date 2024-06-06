@@ -5,7 +5,9 @@ User = get_user_model()
 
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'email', 'first_name', 'last_name', 'bio', 'role')
+    list_display = (
+        'username', 'email', 'first_name', 'last_name', 'bio', 'role'
+    )
     search_fields = ('username', 'email')
     list_display_links = ('username',)
 
