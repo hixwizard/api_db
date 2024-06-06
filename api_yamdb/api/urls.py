@@ -5,6 +5,7 @@ from .views import (
     TitleViewSet, CategoryViewSet,
     GenreViewSet, ReviewViewSet, CommentViewSet
 )
+from .views_matvei import ReviewViewSetT
 
 router_v1 = DefaultRouter()
 
@@ -22,7 +23,7 @@ router_v1.register('genres', GenreViewSet, basename='genres')
 
 # Отзывы
 router_v1.register(r'titles(?P<title_id>\d+)/reviews',
-                   ReviewViewSet, basename='reviews')
+                   ReviewViewSetT, basename='reviews')
 
 # Комментарии
 router_v1.register(r'reviews(?P<review_id>\d+)/comments',
