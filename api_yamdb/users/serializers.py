@@ -1,9 +1,10 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.cache import cache
+from django.core.validators import RegexValidator
 
 from .models import UserModel
-from core.constants import USERNAME_MAX_LENGTH, MAX_CODE, EMAIL_MAX
+from core.constants import USERNAME_MAX_LENGTH, MAX_CODE, EMAIL_MAX, MESSAGE
 
 
 class SignupSerializer(serializers.ModelSerializer):
@@ -13,7 +14,7 @@ class SignupSerializer(serializers.ModelSerializer):
         regex=r'^[\w.@+-]+$',
         max_length=USERNAME_MAX_LENGTH,
         error_messages={
-            'invalid': 'Имя должно состоять из букв, цифр и символов @/./+/-/_'
+            'invalid': MESSAGE
         }
     )
 
@@ -89,6 +90,14 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(
+        max_length=USERNAME_MAX_LENGTH,
+        validators=[RegexValidator(
+            regex=r'^[\w.@+-]+$',
+            message=MESSAGE
+        )]
+    )
+
     class Meta:
         model = UserModel
         fields = [

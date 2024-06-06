@@ -49,8 +49,9 @@ class SignupView(views.APIView):
                 [email],
                 fail_silently=False,
             )
+            # Возвращаем информацию о созданном пользователе
             return Response(
-                {'message': 'Код подтверждения отправлен на указанную почту'},
+                {'username': user.username, 'email': user.email},
                 status=status.HTTP_200_OK
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
