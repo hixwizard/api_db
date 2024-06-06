@@ -9,7 +9,13 @@ from core.constants import USERNAME_MAX_LENGTH, MAX_CODE, EMAIL_MAX
 class SignupSerializer(serializers.ModelSerializer):
     """Сериализатор для регистрации новых пользователей."""
     email = serializers.EmailField()
-    username = serializers.CharField(max_length=USERNAME_MAX_LENGTH)
+    username = serializers.RegexField(
+        regex=r'^[\w.@+-]+$',
+        max_length=USERNAME_MAX_LENGTH,
+        error_messages={
+            'invalid': 'Имя пользователя должно состоять только из букв, цифр и символов @/./+/-/_'
+        }
+    )
 
     class Meta:
         model = UserModel
