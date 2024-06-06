@@ -1,5 +1,5 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, viewsets
+from rest_framework import viewsets
 
 from reviews.models import (
     Category, Genre, Title, Reviews, Comment
