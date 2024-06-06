@@ -3,6 +3,8 @@ from rest_framework import status, views, viewsets, permissions
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
+from rest_framework.viewsets import GenericViewSet
+
 from django.core.mail import send_mail
 from django.core.cache import cache
 from .serializers import (
@@ -91,12 +93,18 @@ class TokenView(views.APIView):
 
 
 class UserViewSet(
-    RetrieveModelMixin, UpdateModelMixin, viewsets.GenericViewSet
+    RetrieveModelMixin, UpdateModelMixin, GenericViewSet
 ):
-    """Набор для выполнения операций с пользователем."""
     queryset = UserModel.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
         return self.request.user
+
+    def create(self, request, *args, **kwargs):
+        serializer = UserCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

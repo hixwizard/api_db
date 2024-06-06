@@ -3,7 +3,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.cache import cache
 
 from .models import UserModel
-from core.constants import USERNAME_MAX_LENGTH, MAX_CODE
+from core.constants import USERNAME_MAX_LENGTH, MAX_CODE, EMAIL_MAX
 
 
 class SignupSerializer(serializers.ModelSerializer):
@@ -65,13 +65,28 @@ class UserSerializer(serializers.ModelSerializer):
             'username', 'email', 'first_name',
             'last_name', 'bio', 'role'
         ]
+        extra_kwargs = {
+            'username': {'max_length': USERNAME_MAX_LENGTH},
+            'email': {'max_length': EMAIL_MAX, 'validators': []},  # Disable email validation
+            'first_name': {'max_length': USERNAME_MAX_LENGTH},
+            'last_name': {'max_length': USERNAME_MAX_LENGTH},
+            'bio': {'allow_blank': True},
+            'role': {'allow_blank': True},
+        }
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
-    """Сериализатор для создания пользователя."""
     class Meta:
         model = UserModel
         fields = [
             'username', 'email', 'first_name',
             'last_name', 'bio', 'role'
         ]
+        extra_kwargs = {
+            'username': {'max_length': USERNAME_MAX_LENGTH},
+            'email': {'max_length': EMAIL_MAX, 'validators': []},  # Disable email validation
+            'first_name': {'max_length': USERNAME_MAX_LENGTH},
+            'last_name': {'max_length': USERNAME_MAX_LENGTH},
+            'bio': {'allow_blank': True},
+            'role': {'allow_blank': True},
+        }
