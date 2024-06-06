@@ -89,6 +89,10 @@ class GenreTitle(models.Model):
         on_delete=models.CASCADE,
     )
 
+    class Meta:
+        verbose_name = 'Жанр к произведению'
+        verbose_name_plural = 'Жанр к произведению'
+
 
 class Reviews(models.Model):
     """Модель отзыва."""
@@ -111,7 +115,7 @@ class Reviews(models.Model):
 
     class Meta:
         verbose_name = 'Отзыв'
-        verbose_name = 'Отзывы'
+        verbose_name_plural = 'Отзывы'
 
     def __str__(self) -> str:
         return self.text
