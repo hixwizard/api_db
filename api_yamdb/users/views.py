@@ -1,7 +1,8 @@
 import random
 from rest_framework import status, views, viewsets, permissions
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
 from django.core.mail import send_mail
 from django.core.cache import cache
 from .serializers import (
@@ -22,22 +23,26 @@ class SignupView(views.APIView):
             email = serializer.validated_data.get('email')
             username = serializer.validated_data.get('username')
             confirmation_code = str(random.randint(MIN_CODE, MAX_CODE))
+
             # Сохраняем код подтверждения в кэше
             cache.set(
                 f'confirmation_code_{email}',
-                confirmation_code, timeout=300
+                confirmation_code
             )
+
             user, created = UserModel.objects.get_or_create(
                 username=username,
                 defaults={'email': email}
             )
             if not created:
-                print(f"User already exists. Updating email for user: {user.username}")
-                user.email = email
+                user.confirmation_code = confirmation_code
+                user.save()
+            else:
+                user.confirmation_code = confirmation_code
                 user.save()
             send_mail(
                 'Код подтверждения',
-                f'Ваш код подтверждения: {confirmation_code}',
+                f'Ваш код подтверждения {confirmation_code}',
                 'noreply@example.com',
                 [email],
                 fail_silently=False,
@@ -46,8 +51,6 @@ class SignupView(views.APIView):
                 {'message': 'Код подтверждения отправлен на указанную почту'},
                 status=status.HTTP_200_OK
             )
-        else:
-            print(f"Signup serializer errors: {serializer.errors}")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -58,19 +61,27 @@ class TokenView(views.APIView):
     def post(self, request):
         serializer = TokenSerializer(data=request.data)
         if serializer.is_valid():
-            email = serializer.validated_data.get('email')
-            confirmation_code = str(
-                serializer.validated_data.get('confirmation_code')
+            username = serializer.validated_data.get('username')
+            confirmation_code = serializer.validated_data.get(
+                'confirmation_code'
             )
-            # Получаем код подтверждения из кэша
-            cache_key = f'confirmation_code_{email}'
-            cached_code = cache.get(cache_key)
-
-            if cached_code == confirmation_code:
-                tokens = serializer.create(validated_data={'email': email})
-
+            if confirmation_code is None:
+                return Response(
+                    {'error': 'Отсутствует код подтверждения'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            try:
+                user = UserModel.objects.get(username=username)
+            except UserModel.DoesNotExist:
+                return Response(
+                    {'error': 'Пользователь с указанным именем не найден'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            cached_code = cache.get(f'confirmation_code_{user.email}')
+            if cached_code and cached_code == str(confirmation_code):
+                tokens = serializer.create(validated_data={'username': username, 'confirmation_code': confirmation_code})
                 # Очистка кэша
-                cache.delete(cache_key)
+                cache.delete(f'confirmation_code_{user.email}')
                 return Response(tokens, status=status.HTTP_200_OK)
             return Response(
                 {'error': 'Неверный код подтверждения'},
@@ -79,18 +90,13 @@ class TokenView(views.APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserViewSet(viewsets.ModelViewSet):
-    """Набор для выполнения CRUD операций с пользователем."""
+class UserViewSet(
+    RetrieveModelMixin, UpdateModelMixin, viewsets.GenericViewSet
+):
+    """Набор для выполнения операций с пользователем."""
     queryset = UserModel.objects.all()
-    permission_classes = [permissions.IsAdminUser]
     serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
 
-    def get_serializer_class(self):
-        if self.action == 'create':
-            return UserCreateSerializer
-        return self.serializer_class
-
-    def get_queryset(self):
-        if self.request.user.is_superuser:
-            return UserModel.objects.all()
-        return UserModel.objects.filter(username=self.request.user.username)
+    def get_object(self):
+        return self.request.user
