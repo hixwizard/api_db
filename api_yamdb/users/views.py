@@ -1,18 +1,19 @@
 import random
-from rest_framework import status, views, viewsets, permissions
+import hashlib
+from rest_framework import status, views
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
 from rest_framework.viewsets import GenericViewSet
-
+from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.core.cache import cache
+
 from .serializers import (
     SignupSerializer, TokenSerializer,
     UserSerializer, UserCreateSerializer)
-
 from .models import UserModel
-from core.constants import MIN_CODE, MAX_CODE
+from core.constants import MIN_CODE, MAX_CODE, EMAIL_MAX
 
 
 class SignupView(views.APIView):
@@ -64,14 +65,14 @@ class TokenView(views.APIView):
         serializer = TokenSerializer(data=request.data)
         if serializer.is_valid():
             username = serializer.validated_data.get('username')
-            confirmation_code = serializer.validated_data.get(
-                'confirmation_code'
-            )
-            if confirmation_code is None:
+            confirmation_code = serializer.validated_data.get('confirmation_code')
+
+            if not username or not confirmation_code:
                 return Response(
-                    {'error': 'Отсутствует код подтверждения'},
+                    {'error': 'Отсутствует имя или код подтверждения'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
+
             try:
                 user = UserModel.objects.get(username=username)
             except UserModel.DoesNotExist:
@@ -79,15 +80,40 @@ class TokenView(views.APIView):
                     {'error': 'Пользователь с указанным именем не найден'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            cached_code = cache.get(f'confirmation_code_{user.email}')
-            if cached_code and cached_code == str(confirmation_code):
-                tokens = serializer.create(validated_data={'username': username, 'confirmation_code': confirmation_code})
-                # Очистка кэша
-                cache.delete(f'confirmation_code_{user.email}')
-                return Response(tokens, status=status.HTTP_200_OK)
+
+            # Проверка длины email
+            if len(user.email) > EMAIL_MAX:
+                return Response(
+                    {'error': 'Email не может быть длиннее 254 символов.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            email_hash = hashlib.md5(user.email.encode()).hexdigest()
+            cached_code = cache.get(f'confirmation_code_{email_hash}')
+
+            if not cached_code or cached_code != str(confirmation_code):
+                return Response(
+                    {'error': 'Неверный код подтверждения'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Создаем токен
+            tokens = serializer.create(
+                validated_data={'username': username,
+                                'confirmation_code': confirmation_code}
+            )
+
+            # Удаляем код подтверждения из кэша
+            cache.delete(f'confirmation_code_{email_hash}')
+
+            # Возвращаем информацию о пользователе и токенах
             return Response(
-                {'error': 'Неверный код подтверждения'},
-                status=status.HTTP_400_BAD_REQUEST
+                {
+                    'username': user.username,
+                    'email': user.email,
+                    'tokens': tokens
+                },
+                status=status.HTTP_200_OK
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
