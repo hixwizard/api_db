@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.core.cache import cache
 
 from .models import UserModel
 from core.constants import USERNAME_MAX_LENGTH, MAX_CODE
@@ -17,10 +18,11 @@ class SignupSerializer(serializers.ModelSerializer):
     def validate_username(self, value):
         if value.lower() == 'me':
             raise serializers.ValidationError('Имя "me" уже занято.')
+        return value
 
     def validate(self, data):
         if UserModel.objects.filter(email=data['email']).exists():
-            raise serializers.ValidationError('Такая почта уже изпользуется.')
+            raise serializers.ValidationError('Такая почта уже используется.')
         if UserModel.objects.filter(username=data['username']).exists():
             raise serializers.ValidationError('Имя пользователя занято.')
         return data
@@ -28,11 +30,26 @@ class SignupSerializer(serializers.ModelSerializer):
 
 class TokenSerializer(serializers.Serializer):
     """Сериализатор для создания токена аутентификации."""
-    email = serializers.EmailField()
-    confirmation_code = serializers.IntegerField(max_value=MAX_CODE)
+    username = serializers.CharField()
+    confirmation_code = serializers.IntegerField(
+        max_value=MAX_CODE, required=True
+    )
 
     def create(self, validated_data):
-        user = UserModel.objects.get(email=validated_data['email'])
+        username = validated_data['username']
+        confirmation_code = validated_data['confirmation_code']
+        try:
+            user = UserModel.objects.get(username=username)
+        except UserModel.DoesNotExist:
+            raise serializers.ValidationError(
+                'Пользователь с указанным именем не найден'
+            )
+
+        cached_code = cache.get(f'confirmation_code_{user.email}')
+
+        if cached_code != str(confirmation_code):
+            raise serializers.ValidationError('Неверный код подтверждения')
+
         refresh = RefreshToken.for_user(user)
         return {
             'refresh': str(refresh),
