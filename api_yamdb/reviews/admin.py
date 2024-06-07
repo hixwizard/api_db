@@ -4,18 +4,21 @@ from .models import Category, Genre, Title, GenreTitle, Reviews, Comment
 
 
 class CategoryAdmin(admin.ModelAdmin):
+    """Административня панель категорий."""
     list_display = ('name', 'slug',)
     search_fields = ('name',)
     list_display_links = ('name',)
 
 
 class GenreAdmin(admin.ModelAdmin):
+    """Административная панель жанров."""
     list_display = ('name', 'slug',)
     search_fields = ('name',)
     list_display_links = ('name',)
 
 
 class TitleAdmin(admin.ModelAdmin):
+    """Административная панель названий."""
     list_display = (
         'name',
         'year',
@@ -28,12 +31,14 @@ class TitleAdmin(admin.ModelAdmin):
 
 
 class GenreTitleAdmin(admin.ModelAdmin):
+    """Административная панель жанра-произведения."""
     list_display = ('genre', 'title')
     search_fields = ('title',)
     list_display_links = ('title',)
 
 
 class ReviewsAdmin(admin.ModelAdmin):
+    """Административная панель отзывов."""
     list_display = (
         'title_id',
         'text',
@@ -45,6 +50,7 @@ class ReviewsAdmin(admin.ModelAdmin):
 
 
 class CommentAdmin(admin.ModelAdmin):
+    """Административная панель комментариев."""
     list_display = (
         'title_id',
         'text',

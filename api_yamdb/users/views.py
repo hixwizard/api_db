@@ -12,7 +12,7 @@ from .serializers import (
     SignupSerializer, TokenSerializer,
     UserSerializer, UserCreateSerializer)
 from .models import UserModel
-from core.constants import MIN_CODE, MAX_CODE, EMAIL_MAX
+from core.constants import MIN_CODE, MAX_CODE
 
 
 class SignupView(views.APIView):
@@ -93,13 +93,6 @@ class TokenView(views.APIView):
                     {'error': 'Пользователь с указанным именем не найден'},
                     status=status.HTTP_404_NOT_FOUND
                 )
-
-            if len(user.email) > EMAIL_MAX:
-                return Response(
-                    {'error': 'Email не может быть длиннее 254 символов.'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
             email_hash = hashlib.md5(user.email.encode()).hexdigest()
             cached_code = cache.get(f'confirmation_code_{email_hash}')
 
@@ -108,17 +101,12 @@ class TokenView(views.APIView):
                     {'error': 'Неверный код подтверждения'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-
-            # Создаем токен
             tokens = serializer.create(
                 validated_data={'username': username,
                                 'confirmation_code': confirmation_code}
             )
-
-            # Удаляем код подтверждения из кэша
             cache.delete(f'confirmation_code_{email_hash}')
 
-            # Возвращаем информацию о пользователе и токенах
             return Response(
                 {
                     'username': user.username,
@@ -133,6 +121,7 @@ class TokenView(views.APIView):
 class UserViewSet(
     RetrieveModelMixin, UpdateModelMixin, GenericViewSet
 ):
+    """Набор отображений пользователей."""
     queryset = UserModel.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
