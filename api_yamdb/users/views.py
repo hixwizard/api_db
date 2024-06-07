@@ -80,7 +80,7 @@ class TokenView(views.APIView):
             except UserModel.DoesNotExist:
                 return Response(
                     {'error': 'Пользователь с указанным именем не найден'},
-                    status=status.HTTP_400_BAD_REQUEST
+                    status=status.HTTP_404_NOT_FOUND
                 )
 
             # Проверка длины email
