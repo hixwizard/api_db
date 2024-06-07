@@ -7,7 +7,7 @@ from reviews.models import (
 )
 from .serializers import (
     CategorySerializer, GenreSerializer, ReviewsSerializer,
-  CommentSerializer, TitleGetSerializer, TitlePostSerializer
+  CommentSerializer, TitleGetSerializer, TitlePostSerializer, TitleSerializer
 )
 from .filters import TitleFilter
 from .mixins import CreateListDestroyViewSet
