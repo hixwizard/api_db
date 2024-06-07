@@ -5,13 +5,14 @@ from reviews.models import Category, Genre, Title, Reviews, Comment
 
 
 class CategorySerializer(serializers.ModelSerializer):
-
+    """Сериализатор категорий."""
     class Meta:
         model = Category
         fields = ('name', 'slug')
 
 
 class GenreSerializer(serializers.ModelSerializer):
+    """Сериализатор жанров."""
 
     class Meta:
         model = Genre
@@ -19,10 +20,14 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
+    """Сериализатор названий."""
+  rating = serializers.IntegerField(read_only=True, required=False)
 
     class Meta:
         model = Title
-        fields = ('name', 'year', 'description', 'genre', 'category')
+        fields = (
+            'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
+        )
 
     def validate_year(self, value):
         if value > now().year:
@@ -31,7 +36,25 @@ class TitleSerializer(serializers.ModelSerializer):
         return value
 
 
+class TitlePostSerializer(TitleSerializer):
+    genre = serializers.SlugRelatedField(
+        queryset=Genre.objects.all(),
+        slug_field='slug',
+        many=True,
+    )
+    category = serializers.SlugRelatedField(
+        queryset=Category.objects.all(),
+        slug_field='slug',
+    )
+
+
+class TitleGetSerializer(TitleSerializer):
+    genre = GenreSerializer(read_only=True, many=True)
+    category = CategorySerializer(read_only=True)
+
+
 class ReviewsSerializer(serializers.ModelSerializer):
+    """Сериализатор отзывов."""
 
     class Meta:
         model = Reviews
@@ -39,6 +62,7 @@ class ReviewsSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    """Сериализатор комментариев."""
 
     class Meta:
         model = Comment

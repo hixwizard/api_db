@@ -69,7 +69,10 @@ class Title(models.Model):
     category = models.ForeignKey(
         Category,
         verbose_name='Категория',
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='titles'
     )
 
     class Meta:
@@ -86,10 +89,12 @@ class GenreTitle(models.Model):
     genre = models.ForeignKey(
         Genre,
         on_delete=models.CASCADE,
+        related_name='genres',
     )
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
+        related_name='titles',
     )
 
     class Meta:

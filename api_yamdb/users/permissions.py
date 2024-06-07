@@ -4,7 +4,7 @@ from rest_framework.permissions import BasePermission
 class IsAuthenticatedOrReadOnly(BasePermission):
     """
     Разрешает доступ только аутентифицированным пользователям
-    для выполнения операций записи (создание, обновление, удаление).
+    для выполнения операций записи (CREATE, PATCH, DELETE).
     Для запросов на чтение (GET) доступ разрешен для всех,
     включая неаутентифицированных пользователей.
     """

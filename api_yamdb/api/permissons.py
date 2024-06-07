@@ -2,6 +2,7 @@ from rest_framework import permissions
 
 
 class AdminOrReadOnly(permissions.BasePermission):
+    """Доступ админу или только для чтения."""
 
     def has_permission(self, request, view):
         return (request.method in permissions.SAFE_METHODS
