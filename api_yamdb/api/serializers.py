@@ -21,16 +21,36 @@ class GenreSerializer(serializers.ModelSerializer):
 
 class TitleSerializer(serializers.ModelSerializer):
     """Сериализатор названий."""
+  rating = serializers.IntegerField(read_only=True, required=False)
 
     class Meta:
         model = Title
-        fields = ('name', 'year', 'description', 'genre', 'category')
+        fields = (
+            'id', 'name', 'year', 'rating', 'description', 'genre', 'category'
+        )
 
     def validate_year(self, value):
         if value > now().year:
             serializers.ValidationError(
                 'Год выпуска не может быть больше текущего')
         return value
+
+
+class TitlePostSerializer(TitleSerializer):
+    genre = serializers.SlugRelatedField(
+        queryset=Genre.objects.all(),
+        slug_field='slug',
+        many=True,
+    )
+    category = serializers.SlugRelatedField(
+        queryset=Category.objects.all(),
+        slug_field='slug',
+    )
+
+
+class TitleGetSerializer(TitleSerializer):
+    genre = GenreSerializer(read_only=True, many=True)
+    category = CategorySerializer(read_only=True)
 
 
 class ReviewsSerializer(serializers.ModelSerializer):
