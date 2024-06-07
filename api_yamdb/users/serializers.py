@@ -58,12 +58,9 @@ class TokenSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 'Пользователь с указанным именем не найден'
             )
-
         cached_code = cache.get(f'confirmation_code_{user.email}')
-
         if cached_code != str(confirmation_code):
             raise serializers.ValidationError('Неверный код подтверждения')
-
         refresh = RefreshToken.for_user(user)
         return {
             'refresh': str(refresh),
