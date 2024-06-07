@@ -20,23 +20,32 @@ class SignupView(views.APIView):
     permission_classes = (AllowAny,)
 
     def post(self, request):
+        email = request.data.get('email')
+        username = request.data.get('username')
+        if UserModel.objects.filter(email=email).exists():
+            if UserModel.objects.filter(username=username).exists():
+                return Response(
+                    {'detail': 'Пользователь уже зарегистрирован.'},
+                    status=status.HTTP_200_OK
+                )
+            else:
+                return Response(
+                    {'detail': 'Пользователь с таким email уже зарегистрирован.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
         serializer = SignupSerializer(data=request.data)
         if serializer.is_valid():
-            email = serializer.validated_data.get('email')
-            username = serializer.validated_data.get('username')
             confirmation_code = str(random.randint(MIN_CODE, MAX_CODE))
-
-            # Сохраняем код подтверждения в кэше
             cache.set(
                 f'confirmation_code_{email}',
                 confirmation_code
             )
-
             user, created = UserModel.objects.get_or_create(
                 username=username,
                 defaults={'email': email}
             )
             if not created:
+                user.email = email
                 user.confirmation_code = confirmation_code
                 user.save()
             else:
@@ -49,12 +58,14 @@ class SignupView(views.APIView):
                 [email],
                 fail_silently=False,
             )
-            # Возвращаем информацию о созданном пользователе
             return Response(
                 {'username': user.username, 'email': user.email},
                 status=status.HTTP_200_OK
             )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(
+                serializer.errors, status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class TokenView(views.APIView):
@@ -83,7 +94,6 @@ class TokenView(views.APIView):
                     status=status.HTTP_404_NOT_FOUND
                 )
 
-            # Проверка длины email
             if len(user.email) > EMAIL_MAX:
                 return Response(
                     {'error': 'Email не может быть длиннее 254 символов.'},
