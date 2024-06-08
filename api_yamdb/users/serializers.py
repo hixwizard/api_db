@@ -76,14 +76,6 @@ class UserSerializer(serializers.ModelSerializer):
             'username', 'email', 'first_name',
             'last_name', 'bio', 'role'
         ]
-        extra_kwargs = {
-            'username': {'max_length': USERNAME_MAX_LENGTH},
-            'email': {'max_length': EMAIL_MAX, 'validators': []},
-            'first_name': {'max_length': USERNAME_MAX_LENGTH},
-            'last_name': {'max_length': USERNAME_MAX_LENGTH},
-            'bio': {'allow_blank': True},
-            'role': {'allow_blank': True},
-        }
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
@@ -101,11 +93,3 @@ class UserCreateSerializer(serializers.ModelSerializer):
             'username', 'email', 'first_name',
             'last_name', 'bio', 'role'
         ]
-        extra_kwargs = {
-            'username': {'max_length': USERNAME_MAX_LENGTH},
-            'email': {'max_length': EMAIL_MAX, 'validators': []},
-            'first_name': {'max_length': USERNAME_MAX_LENGTH},
-            'last_name': {'max_length': USERNAME_MAX_LENGTH},
-            'bio': {'allow_blank': True},
-            'role': {'allow_blank': True},
-        }
