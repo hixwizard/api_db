@@ -35,6 +35,7 @@ class UserModel(AbstractUser):
         return self.role == ROLE_CHOICES['moderator']
 
     class Meta:
+        ordering = ('username',)
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
 
