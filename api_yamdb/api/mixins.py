@@ -1,6 +1,7 @@
 from rest_framework import filters, mixins, viewsets
 
 from .permissons import AdminOrReadOnly
+from core.constants import USERNAME_MAX_LENGTH, EMAIL_MAX
 
 
 class CreateListDestroyViewSet(mixins.CreateModelMixin,
@@ -12,3 +13,15 @@ class CreateListDestroyViewSet(mixins.CreateModelMixin,
     search_fields = ('name',)
     permission_classes = (AdminOrReadOnly,)
     lookup_field = 'slug'
+
+
+class ExtraKwargsMixin:
+    class Meta:
+        extra_kwargs = {
+            'username': {'max_length': USERNAME_MAX_LENGTH},
+            'email': {'max_length': EMAIL_MAX, 'validators': []},
+            'first_name': {'max_length': USERNAME_MAX_LENGTH},
+            'last_name': {'max_length': USERNAME_MAX_LENGTH},
+            'bio': {'allow_blank': True},
+            'role': {'allow_blank': True},
+        }

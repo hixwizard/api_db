@@ -8,9 +8,7 @@ from core.constants import (
 
 class UserModel(AbstractUser):
     """Кастомная модель пользователя."""
-    username = models.CharField(
-        max_length=USERNAME_MAX_LENGTH, unique=True
-    )
+    username = models.CharField(max_length=USERNAME_MAX_LENGTH, unique=True)
     email = models.EmailField(max_length=EMAIL_MAX, unique=True)
     first_name = models.CharField(max_length=USERNAME_MAX_LENGTH, blank=True)
     last_name = models.CharField(max_length=USERNAME_MAX_LENGTH, blank=True)
@@ -22,9 +20,6 @@ class UserModel(AbstractUser):
         default=ROLE_CHOICES['user'],
         blank=True
     )
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
 
     @property
     def is_admin(self):
