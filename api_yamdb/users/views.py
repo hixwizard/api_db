@@ -1,6 +1,6 @@
 import random
 import hashlib
-from rest_framework import status, views
+from rest_framework import status, views, viewsets
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
@@ -116,9 +116,7 @@ class TokenView(views.APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserViewSet(
-    RetrieveModelMixin, UpdateModelMixin, GenericViewSet
-):
+class UserViewSet(viewsets.ModelViewSet):
     """Набор отображений пользователей."""
     queryset = UserModel.objects.all()
     serializer_class = UserCreateSerializer
