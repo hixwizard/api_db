@@ -1,8 +1,10 @@
+import hashlib
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.cache import cache
 from django.core.validators import RegexValidator
 
+from .mixins import ExtraKwargsMixin 
 from .models import UserModel
 from core.constants import USERNAME_MAX_LENGTH, MAX_CODE, EMAIL_MAX, MESSAGE
 
@@ -68,7 +70,7 @@ class TokenSerializer(serializers.Serializer):
         }
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer, ExtraKwargsMixin):
     """Сериализатор для пользователя."""
     class Meta:
         model = UserModel
@@ -86,7 +88,7 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
 
-class UserCreateSerializer(serializers.ModelSerializer):
+class UserCreateSerializer(ExtraKwargsMixin, serializers.ModelSerializer):
     username = serializers.CharField(
         max_length=USERNAME_MAX_LENGTH,
         validators=[RegexValidator(
@@ -95,17 +97,9 @@ class UserCreateSerializer(serializers.ModelSerializer):
         )]
     )
 
-    class Meta:
+    class Meta(ExtraKwargsMixin.Meta):
         model = UserModel
         fields = [
             'username', 'email', 'first_name',
             'last_name', 'bio', 'role'
         ]
-        extra_kwargs = {
-            'username': {'max_length': USERNAME_MAX_LENGTH},
-            'email': {'max_length': EMAIL_MAX, 'validators': []},
-            'first_name': {'max_length': USERNAME_MAX_LENGTH},
-            'last_name': {'max_length': USERNAME_MAX_LENGTH},
-            'bio': {'allow_blank': True},
-            'role': {'allow_blank': True},
-        }
