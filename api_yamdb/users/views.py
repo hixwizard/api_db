@@ -21,6 +21,21 @@ class SignupView(views.APIView):
     def post(self, request):
         print("Received signup request data:", request.data)
         serializer = SignupSerializer(data=request.data)
+        email = request.data.get('email')
+        username = request.data.get('username')
+        if UserModel.objects.filter(email=email).exists():
+            if UserModel.objects.filter(username=username).exists():
+                return Response(
+                    {'detail': 'Пользователь уже зарегистрирован.'},
+                    status=status.HTTP_200_OK
+                )
+            else:
+                return Response(
+                    {'detail': 'Пользователь с таким email уже зарегистрирован.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        serializer = SignupSerializer(data=request.data)
         if serializer.is_valid():
             email = serializer.validated_data.get('email')
             username = serializer.validated_data.get('username')
@@ -34,6 +49,9 @@ class SignupView(views.APIView):
                 username=username,
                 email=email
             )
+            if not created:
+                user.email = email
+                user.save()
             user.confirmation_code = confirmation_code
             user.save()
 
@@ -45,8 +63,9 @@ class SignupView(views.APIView):
                 fail_silently=False,
             )
             return Response(
-                {'message': 'Код подтверждения отправлен на указанную почту'},
-                status=status.HTTP_200_OK)
+                {'username': user.username, 'email': user.email},
+                status=status.HTTP_200_OK
+            )
         else:
             print("Signup serializer errors:", serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -66,6 +85,19 @@ class TokenView(views.APIView):
             print(f"Cache key: {cache_key}")
             print(f"Cached code: {cached_code}, Type: {type(cached_code)}")
             print(f"Confirmation code: {confirmation_code}, Type: {type(confirmation_code)}")
+            if not username or not confirmation_code:
+                return Response(
+                    {'error': 'Отсутствует имя или код подтверждения'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            try:
+                user = UserModel.objects.get(username=username)
+            except UserModel.DoesNotExist:
+                return Response(
+                    {'error': 'Пользователь с указанным именем не найден'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
 
             if cached_code == confirmation_code:
                 user = UserModel.objects.get(username=username)

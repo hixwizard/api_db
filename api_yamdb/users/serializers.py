@@ -24,6 +24,18 @@ class SignupSerializer(serializers.ModelSerializer):
         model = UserModel
         fields = ('email', 'username')
 
+    def validate_username(self, value):
+        if value.lower() == 'me':
+            raise ValidationError('Имя "me" уже занято.')
+        return value
+
+    def validate_email(self, value):
+        if len(value) > EMAIL_MAX:
+            raise ValidationError(
+                'Email не может быть длиннее 254 символов.'
+            )
+        return value
+
     def validate(self, data):
         if UserModel.objects.filter(email=data['email']).exists():
             raise serializers.ValidationError('Такая почта уже используется.')
