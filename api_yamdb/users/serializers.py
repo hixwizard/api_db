@@ -1,8 +1,11 @@
+import hashlib
+from rest_framework.serializers import ValidationError
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.cache import cache
 from django.core.validators import RegexValidator
 
+from .mixins import ExtraKwargsMixin
 from .models import UserModel
 from core.constants import USERNAME_MAX_LENGTH, MAX_CODE, EMAIL_MAX, MESSAGE
 
@@ -24,21 +27,21 @@ class SignupSerializer(serializers.ModelSerializer):
 
     def validate_username(self, value):
         if value.lower() == 'me':
-            raise serializers.ValidationError('Имя "me" уже занято.')
+            raise ValidationError('Имя "me" уже занято.')
         return value
 
     def validate_email(self, value):
         if len(value) > EMAIL_MAX:
-            raise serializers.ValidationError(
+            raise ValidationError(
                 'Email не может быть длиннее 254 символов.'
             )
         return value
 
     def validate(self, data):
         if UserModel.objects.filter(email=data['email']).exists():
-            raise serializers.ValidationError('Такая почта уже используется.')
+            raise ValidationError('Такая почта уже используется.')
         if UserModel.objects.filter(username=data['username']).exists():
-            raise serializers.ValidationError('Имя пользователя занято.')
+            raise ValidationError('Имя пользователя занято.')
         return data
 
 
@@ -55,12 +58,12 @@ class TokenSerializer(serializers.Serializer):
         try:
             user = UserModel.objects.get(username=username)
         except UserModel.DoesNotExist:
-            raise serializers.ValidationError(
+            raise ValidationError(
                 'Пользователь с указанным именем не найден'
             )
         cached_code = cache.get(f'confirmation_code_{user.email}')
         if cached_code != str(confirmation_code):
-            raise serializers.ValidationError('Неверный код подтверждения')
+            raise ValidationError('Неверный код подтверждения')
         refresh = RefreshToken.for_user(user)
         return {
             'refresh': str(refresh),
@@ -68,7 +71,7 @@ class TokenSerializer(serializers.Serializer):
         }
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer, ExtraKwargsMixin):
     """Сериализатор для пользователя."""
     class Meta:
         model = UserModel
@@ -78,7 +81,7 @@ class UserSerializer(serializers.ModelSerializer):
         ]
 
 
-class UserCreateSerializer(serializers.ModelSerializer):
+class UserCreateSerializer(ExtraKwargsMixin, serializers.ModelSerializer):
     username = serializers.CharField(
         max_length=USERNAME_MAX_LENGTH,
         validators=[RegexValidator(

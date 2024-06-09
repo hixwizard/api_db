@@ -22,6 +22,7 @@ class SignupView(views.APIView):
     def post(self, request):
         email = request.data.get('email')
         username = request.data.get('username')
+
         if UserModel.objects.filter(email=email).exists():
             if UserModel.objects.filter(username=username).exists():
                 return Response(
@@ -33,39 +34,36 @@ class SignupView(views.APIView):
                     {'detail': 'Пользователь с таким email уже зарегистрирован.'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
+
         serializer = SignupSerializer(data=request.data)
         if serializer.is_valid():
             confirmation_code = str(random.randint(MIN_CODE, MAX_CODE))
-            cache.set(
-                f'confirmation_code_{email}',
-                confirmation_code
-            )
+            email_hash = hashlib.md5(email.encode()).hexdigest()
+            cache.set(f'confirmation_code_{email_hash}', confirmation_code, timeout=3600)  # Срок действия 1 час
+
             user, created = UserModel.objects.get_or_create(
                 username=username,
                 defaults={'email': email}
             )
+
             if not created:
                 user.email = email
-                user.confirmation_code = confirmation_code
                 user.save()
-            else:
-                user.confirmation_code = confirmation_code
-                user.save()
+
             send_mail(
                 'Код подтверждения',
-                f'Ваш код подтверждения {confirmation_code}',
+                f'Ваш код подтверждения: {confirmation_code}',
                 'noreply@example.com',
                 [email],
                 fail_silently=False,
             )
+
             return Response(
                 {'username': user.username, 'email': user.email},
                 status=status.HTTP_200_OK
             )
-        else:
-            return Response(
-                serializer.errors, status=status.HTTP_400_BAD_REQUEST
-            )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TokenView(views.APIView):
@@ -123,7 +121,7 @@ class UserViewSet(
 ):
     """Набор отображений пользователей."""
     queryset = UserModel.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = UserCreateSerializer
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
