@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import RegexValidator
 from django.db import models
 
 from core.constants import (
@@ -9,7 +10,11 @@ from core.constants import (
 class UserModel(AbstractUser):
     """Кастомная модель пользователя."""
     username = models.CharField(
-        max_length=USERNAME_MAX_LENGTH, unique=True
+        max_length=USERNAME_MAX_LENGTH,
+        unique=True,
+        validators=[RegexValidator(
+            regex=r'^[\w.@+-]+\Z',
+            message='Разрешены только буквы, цифры и символы @ . + - _',)]
     )
     email = models.EmailField(max_length=EMAIL_MAX, unique=True)
     first_name = models.CharField(max_length=USERNAME_MAX_LENGTH, blank=True)
@@ -22,9 +27,6 @@ class UserModel(AbstractUser):
         default=ROLE_CHOICES['user'],
         blank=True
     )
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
 
     @property
     def is_admin(self):

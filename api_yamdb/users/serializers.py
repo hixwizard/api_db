@@ -57,6 +57,8 @@ class TokenSerializer(serializers.Serializer):
 
 class UserSerializer(serializers.ModelSerializer, ExtraKwargsMixin):
     """Сериализатор для пользователя."""
+    role = serializers.CharField(read_only=True)
+
     class Meta:
         model = UserModel
         fields = [
