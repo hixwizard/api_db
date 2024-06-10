@@ -1,21 +1,21 @@
+from rest_framework.serializers import ValidationError
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.core.cache import cache
 from django.core.validators import RegexValidator
 
+from .mixins import ExtraKwargsMixin
 from .models import UserModel
-from core.constants import USERNAME_MAX_LENGTH, MAX_CODE, EMAIL_MAX, MESSAGE
+from core.constants import USERNAME_MAX_LENGTH, MAX_CODE, EMAIL_MAX, MESSAGE, CODE_LENGTH
 
 
 class SignupSerializer(serializers.ModelSerializer):
-    """Сериализатор для регистрации новых пользователей."""
-    email = serializers.EmailField()
-    username = serializers.RegexField(
-        regex=r'^[\w.@+-]+$',
+    email = serializers.EmailField(max_length=EMAIL_MAX)
+    username = serializers.CharField(
         max_length=USERNAME_MAX_LENGTH,
-        error_messages={
-            'invalid': MESSAGE
-        }
+        validators=[RegexValidator(
+            regex=r'^[\w.@+-]+$',
+            message='Имя пользователя должно содержать только допустимые символы',
+        )]
     )
 
     class Meta:
@@ -24,12 +24,12 @@ class SignupSerializer(serializers.ModelSerializer):
 
     def validate_username(self, value):
         if value.lower() == 'me':
-            raise serializers.ValidationError('Имя "me" уже занято.')
+            raise ValidationError('Имя "me" уже занято.')
         return value
 
     def validate_email(self, value):
         if len(value) > EMAIL_MAX:
-            raise serializers.ValidationError(
+            raise ValidationError(
                 'Email не может быть длиннее 254 символов.'
             )
         return value
@@ -43,27 +43,11 @@ class SignupSerializer(serializers.ModelSerializer):
 
 
 class TokenSerializer(serializers.Serializer):
-    """Сериализатор для создания токена аутентификации."""
     username = serializers.CharField()
-    confirmation_code = serializers.IntegerField(
-        max_value=MAX_CODE, required=True
-    )
+    confirmation_code = serializers.IntegerField(max_value=MAX_CODE)
 
     def create(self, validated_data):
-        username = validated_data['username']
-        confirmation_code = validated_data['confirmation_code']
-        try:
-            user = UserModel.objects.get(username=username)
-        except UserModel.DoesNotExist:
-            raise serializers.ValidationError(
-                'Пользователь с указанным именем не найден'
-            )
-
-        cached_code = cache.get(f'confirmation_code_{user.email}')
-
-        if cached_code != str(confirmation_code):
-            raise serializers.ValidationError('Неверный код подтверждения')
-
+        user = UserModel.objects.get(username=validated_data['username'])
         refresh = RefreshToken.for_user(user)
         return {
             'refresh': str(refresh),
@@ -71,25 +55,19 @@ class TokenSerializer(serializers.Serializer):
         }
 
 
-class UserSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer, ExtraKwargsMixin):
     """Сериализатор для пользователя."""
+    role = serializers.CharField(read_only=True)
+
     class Meta:
         model = UserModel
         fields = [
             'username', 'email', 'first_name',
             'last_name', 'bio', 'role'
         ]
-        extra_kwargs = {
-            'username': {'max_length': USERNAME_MAX_LENGTH},
-            'email': {'max_length': EMAIL_MAX, 'validators': []},
-            'first_name': {'max_length': USERNAME_MAX_LENGTH},
-            'last_name': {'max_length': USERNAME_MAX_LENGTH},
-            'bio': {'allow_blank': True},
-            'role': {'allow_blank': True},
-        }
 
 
-class UserCreateSerializer(serializers.ModelSerializer):
+class UserCreateSerializer(ExtraKwargsMixin, serializers.ModelSerializer):
     username = serializers.CharField(
         max_length=USERNAME_MAX_LENGTH,
         validators=[RegexValidator(
@@ -104,11 +82,3 @@ class UserCreateSerializer(serializers.ModelSerializer):
             'username', 'email', 'first_name',
             'last_name', 'bio', 'role'
         ]
-        extra_kwargs = {
-            'username': {'max_length': USERNAME_MAX_LENGTH},
-            'email': {'max_length': EMAIL_MAX, 'validators': []},
-            'first_name': {'max_length': USERNAME_MAX_LENGTH},
-            'last_name': {'max_length': USERNAME_MAX_LENGTH},
-            'bio': {'allow_blank': True},
-            'role': {'allow_blank': True},
-        }

@@ -1,29 +1,21 @@
 from django.db.models import Avg
-from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, viewsets, permissions, status
+from django.shortcuts import get_object_or_404
+from rest_framework import viewsets, permissions
 
 from reviews.models import (
-    Category,
-    Genre,
-    Title,
-    Reviews,
-    Comment
-)
+    Category, Genre, Title, Reviews)
 from .serializers import (
-    CategorySerializer, GenreSerializer, ReviewsSerializer,
-    CommentSerializer, TitleGetSerializer, TitlePostSerializer, TitleSerializer
-)
+    CategorySerializer,
+    GenreSerializer,
+    ReviewsSerializer,
+    CommentSerializer,
+    TitleGetSerializer,
+    TitlePostSerializer,
+    TitleSerializer)
 from .filters import TitleFilter
 from .mixins import CreateListDestroyViewSet
 from .permissons import AdminOrReadOnly
-
-
-class AuthViewSet(viewsets.ModelViewSet):
-    pass
-
-
-# class UserViewSet(viewsets.ModelViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -47,11 +39,13 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 
 class CategoryViewSet(CreateListDestroyViewSet):
+    """Набор категорий."""
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
 
 class GenreViewSet(CreateListDestroyViewSet):
+    """Набор жанров."""
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
 
