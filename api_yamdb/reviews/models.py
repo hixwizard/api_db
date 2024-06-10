@@ -102,7 +102,8 @@ class Reviews(models.Model):
     title_id = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
-        verbose_name='ID произведения'
+        verbose_name='ID произведения',
+        related_name='reviews'
     )
     text = models.TextField(
         verbose_name='Текст отзыва'
