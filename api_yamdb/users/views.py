@@ -1,6 +1,8 @@
 import random
 import hashlib
 from rest_framework import status, views, viewsets
+from rest_framework.decorators import action
+from rest_framework.filters import SearchFilter
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
@@ -13,6 +15,7 @@ from .serializers import (
     UserSerializer, UserCreateSerializer)
 from .models import UserModel
 from core.constants import MIN_CODE, MAX_CODE
+from .permissions import AdminOnly
 
 
 class SignupView(views.APIView):
@@ -120,15 +123,18 @@ class UserViewSet(viewsets.ModelViewSet):
     """Набор отображений пользователей."""
     queryset = UserModel.objects.all()
     serializer_class = UserCreateSerializer
-    permission_classes = [IsAuthenticated]
+    filter_backends = (SearchFilter,)
+    search_fields = ('username',)
+    lookup_field = 'username'
+    permission_classes = (AdminOnly,)
     http_method_names = ('get', 'post', 'patch', 'delete')
 
-    def get_object(self):
-        return self.request.user
-
-    def create(self, request, *args, **kwargs):
-        serializer = UserCreateSerializer(data=request.data)
-        if serializer.is_valid():
+    @action(methods=['get', 'patch'], detail=False, url_path='me',
+            permission_classes=(IsAuthenticated,))
+    def get_my_profile(self, request):
+        serializer = UserSerializer(request.user, partial=True,
+                                    data=request.data)
+        serializer.is_valid(raise_exception=True)
+        if request.method == 'PATCH':
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.data, status=status.HTTP_200_OK)
