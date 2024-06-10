@@ -54,11 +54,16 @@ class TitleGetSerializer(TitleSerializer):
 
 
 class ReviewsSerializer(serializers.ModelSerializer):
-    """Сериализатор отзывов."""
+    author = serializers.StringRelatedField(
+        read_only=True,
+    )
+    title_id = serializers.IntegerField(
+        required=False,
+    )
 
     class Meta:
         model = Reviews
-        fields = ('text', 'score')
+        fields = ('title_id', 'author', 'text', 'score')
 
 
 class CommentSerializer(serializers.ModelSerializer):
