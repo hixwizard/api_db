@@ -1,8 +1,6 @@
-import hashlib
 from rest_framework.serializers import ValidationError
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.core.cache import cache
 from django.core.validators import RegexValidator
 
 from .mixins import ExtraKwargsMixin
@@ -11,12 +9,12 @@ from core.constants import USERNAME_MAX_LENGTH, MAX_CODE, EMAIL_MAX, MESSAGE, CO
 
 
 class SignupSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(max_length=254)  # Ensure email length is checked
+    email = serializers.EmailField(max_length=EMAIL_MAX)
     username = serializers.CharField(
         max_length=USERNAME_MAX_LENGTH,
         validators=[RegexValidator(
             regex=r'^[\w.@+-]+$',
-            message='Имя пользователя должно содержать только буквы, цифры, и символы @/./+/-/_',
+            message='Имя пользователя должно содержать только допустимые символы',
         )]
     )
 
