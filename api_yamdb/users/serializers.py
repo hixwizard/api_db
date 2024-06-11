@@ -68,13 +68,6 @@ class UserSerializer(serializers.ModelSerializer, ExtraKwargsMixin):
 
 
 class UserCreateSerializer(ExtraKwargsMixin, serializers.ModelSerializer):
-    username = serializers.CharField(
-        max_length=USERNAME_MAX_LENGTH,
-        validators=[RegexValidator(
-            regex=r'^[\w.@+-]+$',
-            message=MESSAGE
-        )]
-    )
 
     class Meta:
         model = UserModel
