@@ -111,7 +111,7 @@ class Reviews(models.Model):
         verbose_name='ID произведения'
     )
     text = models.TextField(
-        verbose_name='Текст отзыва'
+        verbose_name='Текст отзыва',
     )
     score = models.IntegerField(
         verbose_name='Оценка'
@@ -119,12 +119,21 @@ class Reviews(models.Model):
     author = models.ForeignKey(
         User,
         verbose_name='Автор',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+    )
+    pub_date = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Время публикации',
+        db_index=True
     )
 
     class Meta:
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
+        constraints = [models.UniqueConstraint(
+            fields=['author'],
+            name='unique'
+        ),]
 
     def __str__(self) -> str:
         return self.text
@@ -141,6 +150,7 @@ class Comment(models.Model):
         Reviews,
         on_delete=models.CASCADE,
         verbose_name='ID отзыва',
+        related_name='comments'
     )
     text = models.TextField(
         verbose_name='Текст комментария',
@@ -149,6 +159,11 @@ class Comment(models.Model):
         User,
         verbose_name='Автор',
         on_delete=models.CASCADE
+    )
+    pub_date = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Время публикации',
+        db_index=True
     )
 
     class Meta:
