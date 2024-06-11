@@ -59,12 +59,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         IsAuthorIsModeratorIsAdminOrReadOnly,
         permissions.IsAuthenticatedOrReadOnly
     )
-    http_method_names = [
-        'get',
-        'post',
-        'patch',
-        'delete'
-    ]
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def perform_create(self, serializer):
         title_id = get_object_or_404(
@@ -93,12 +88,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         permissions.IsAuthenticatedOrReadOnly,
         IsAuthorIsModeratorIsAdminOrReadOnly
     )
-    http_method_names = [
-        'get',
-        'post',
-        'patch',
-        'delete'
-    ]
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_queryset(self):
         rewiew = get_object_or_404(
