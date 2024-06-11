@@ -25,7 +25,6 @@ class TitleViewSet(viewsets.ModelViewSet):
     """Набор названий."""
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
-
     permission_classes = (AdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
