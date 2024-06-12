@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator
 from core.constants import NAME_MAX, SLUG_MAX
+from users.models import UserModel
 User = get_user_model()
 
 
@@ -112,7 +113,7 @@ class Review(models.Model):
     !delete(admin or owner)
     """
     title = models.ForeignKey(
-        Title,
+        UserModel,
         on_delete=models.CASCADE,
         related_name='reviews',
         verbose_name='title'
@@ -134,6 +135,7 @@ class Review(models.Model):
     class Meta:
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
+        ordering = ('-pub_date',)
 
     def __str__(self) -> str:
         return self.text
@@ -148,7 +150,7 @@ class Comment(models.Model):
     !delete admin or owner
     """
     title = models.ForeignKey(
-        Title,
+        Review,
         on_delete=models.CASCADE,
         verbose_name='title'
     )

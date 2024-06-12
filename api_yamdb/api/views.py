@@ -3,7 +3,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from reviews.models import (
-    Category, Genre, Title, Review)
+    Category, Genre, Title, Review, Comment)
 from .serializers import (
     CategorySerializer,
     GenreSerializer,
@@ -14,7 +14,7 @@ from .serializers import (
     TitleSerializer)
 from .filters import TitleFilter
 from .mixins import CreateListDestroyViewSet
-from .permissons import AdminOrReadOnly
+from .permissons import AdminOrReadOnly, ReviewCommentPermission
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -52,14 +52,46 @@ class GenreViewSet(CreateListDestroyViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     '''Набор отзывов.'''
     serializer_class = ReviewSerializer
-    permission_classes = ReviewSerializer
+    permission_classes = (ReviewCommentPermission,)
 
-    def get_serializer_class(self):
-        review = self.kwargs['id']
-        return Review.objects.all(review=review)
+    def get_queryset(self):
+        return Title.objects.all(self.kwargs['title_id'])
+
+    def get_object(self):
+        return Title.objects.get(self.kwargs['title_id'])
+
+    def perform_create(self, serializer):
+        '''post'''
+        return super().perform_create(serializer)
+
+    def partial_update(self, request, *args, **kwargs):
+        '''patch'''
+        return super().partial_update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        '''delete'''
+        return super().destroy(request, *args, **kwargs)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
     '''Набор комментариев.'''
     serializer_class = CommentSerializer
-    permission_classes = CommentSerializer
+    permission_classes = (ReviewCommentPermission,)
+
+    def get_queryset(self):
+        return Review.objects.all(self.kwargs['title_id'])
+
+    def get_object(self):
+        return Review.objects.get(self.kwargs['title_id'])
+
+    def perform_create(self, serializer):
+        '''post'''
+        return super().perform_create(serializer)
+
+    def partial_update(self, request, *args, **kwargs):
+        '''patch'''
+        return super().partial_update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        '''delete'''
+        return super().destroy(request, *args, **kwargs)
