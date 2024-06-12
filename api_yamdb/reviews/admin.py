@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Category, Genre, Title, GenreTitle, Reviews, Comment
+from .models import Category, Genre, Title, GenreTitle, Review, Comment
 
 
 class CategoryAdmin(admin.ModelAdmin):
@@ -37,7 +37,7 @@ class GenreTitleAdmin(admin.ModelAdmin):
     list_display_links = ('title',)
 
 
-class ReviewsAdmin(admin.ModelAdmin):
+class ReviewAdmin(admin.ModelAdmin):
     """Административная панель отзывов."""
     list_display = (
         'title_id',
@@ -64,5 +64,5 @@ admin.site.register(Category, CategoryAdmin)
 admin.site.register(Genre, GenreAdmin)
 admin.site.register(Title, TitleAdmin)
 admin.site.register(GenreTitle, GenreTitleAdmin)
-admin.site.register(Reviews, ReviewsAdmin)
+admin.site.register(Review, ReviewAdmin)
 admin.site.register(Comment, CommentAdmin)

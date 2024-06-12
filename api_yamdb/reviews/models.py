@@ -1,6 +1,7 @@
+from django.utils import timezone
 from django.db import models
 from django.contrib.auth import get_user_model
-
+from django.core.validators import MaxValueValidator
 from core.constants import NAME_MAX, SLUG_MAX
 User = get_user_model()
 
@@ -102,25 +103,33 @@ class GenreTitle(models.Model):
         verbose_name_plural = 'Жанр к произведению'
 
 
-class Reviews(models.Model):
-    """Модель отзыва."""
-    title_id = models.ForeignKey(
+class Review(models.Model):
+    """
+    список(title), 200, 404
+    объект индекса(title, review), 200 obj id
+    post(jwt, text, score), auth
+    !patch(admin or owner),
+    !delete(admin or owner)
+    """
+    title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
         related_name='reviews',
-        verbose_name='ID произведения'
+        verbose_name='title'
     )
     text = models.TextField(
         verbose_name='Текст отзыва'
     )
-    score = models.IntegerField(
-        verbose_name='Оценка'
+    score = models.PositiveIntegerField(
+        validators=[MaxValueValidator(10),],
+        verbose_name='score',
     )
     author = models.ForeignKey(
         User,
-        verbose_name='Автор',
+        verbose_name='author',
         on_delete=models.CASCADE
     )
+    created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = 'Отзыв'
@@ -131,25 +140,32 @@ class Reviews(models.Model):
 
 
 class Comment(models.Model):
-    """Модель комментария."""
-    title_id = models.ForeignKey(
+    """
+    get 200, 404 list allow any
+    get obj com-rev
+    post pk-rev
+    !patch admin or owner
+    !delete admin or owner
+    """
+    title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
-        verbose_name='ID произведения'
+        verbose_name='title'
     )
-    review_id = models.ForeignKey(
-        Reviews,
+    review = models.ForeignKey( # ?
+        Review,
         on_delete=models.CASCADE,
-        verbose_name='ID отзыва',
+        verbose_name='review',
     )
     text = models.TextField(
-        verbose_name='Текст комментария',
+        verbose_name='comment text',
     )
     author = models.ForeignKey(
         User,
-        verbose_name='Автор',
+        verbose_name='author',
         on_delete=models.CASCADE
     )
+    created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = 'Комментарий'
