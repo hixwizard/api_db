@@ -1,12 +1,9 @@
 import random
-import hashlib
 from rest_framework import status, views, viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.mixins import RetrieveModelMixin, UpdateModelMixin
-from rest_framework.viewsets import GenericViewSet
 from django.core.mail import send_mail
 from django.core.cache import cache
 
@@ -73,6 +70,7 @@ class SignupView(views.APIView):
             print("Signup serializer errors:", serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class TokenView(views.APIView):
     permission_classes = (AllowAny,)
 
@@ -117,7 +115,6 @@ class TokenView(views.APIView):
                 )
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 class UserViewSet(viewsets.ModelViewSet):
