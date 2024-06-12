@@ -58,11 +58,11 @@ class ReviewViewSet(viewsets.ModelViewSet):
         return Title.objects.all(self.kwargs['title_id'])
 
     def get_object(self):
-        return Title.objects.get(self.kwargs['title_id'])
+        return Title.objects.get(self.kwargs['title_id']['review_id'])
 
     def perform_create(self, serializer):
         '''post'''
-        return super().perform_create(serializer)
+        return Title.objects.get(self.kwargs['title_id'])
 
     def partial_update(self, request, *args, **kwargs):
         '''patch'''

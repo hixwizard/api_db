@@ -60,9 +60,6 @@ class ReviewSerializer(serializers.ModelSerializer):
     author = serializers.StringRelatedField(
         read_only=True,
     )
-    title = serializers.IntegerField(
-        required=False,
-    )
 
     class Meta:
         model = Review
