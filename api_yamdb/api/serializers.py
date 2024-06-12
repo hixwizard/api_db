@@ -1,7 +1,7 @@
 from django.utils.timezone import now
 from rest_framework import serializers
 
-from reviews.models import Category, Genre, Title, Reviews, Comment
+from reviews.models import Category, Genre, Title, Review, Comment
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -37,6 +37,7 @@ class TitleSerializer(serializers.ModelSerializer):
 
 
 class TitlePostSerializer(TitleSerializer):
+    '''Сериализатор связаной модели.'''
     genre = serializers.SlugRelatedField(
         queryset=Genre.objects.all(),
         slug_field='slug',
@@ -49,11 +50,13 @@ class TitlePostSerializer(TitleSerializer):
 
 
 class TitleGetSerializer(TitleSerializer):
+    '''Сериализатор связаной модели.'''
     genre = GenreSerializer(read_only=True, many=True)
     category = CategorySerializer(read_only=True)
 
 
-class ReviewsSerializer(serializers.ModelSerializer):
+class ReviewSerializer(serializers.ModelSerializer):
+    """Сериализатор отзывов."""
     author = serializers.StringRelatedField(
         read_only=True,
     )
@@ -62,8 +65,8 @@ class ReviewsSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        model = Reviews
-        fields = ('title_id', 'author', 'text', 'score')
+        model = Review
+        fields = ('title', 'author', 'text', 'score')
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -71,4 +74,4 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ('text')
+        fields = ('text',)
