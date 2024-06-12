@@ -4,6 +4,7 @@ from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from reviews.models import (
     Category, Genre, Title, Review)
+from .mixins import CommentReviewMixin
 from .serializers import (
     CategorySerializer,
     GenreSerializer,
@@ -49,17 +50,13 @@ class GenreViewSet(CreateListDestroyViewSet):
     serializer_class = GenreSerializer
 
 
-class ReviewViewSet(viewsets.ModelViewSet):
+class ReviewViewSet(viewsets.ModelViewSet, CommentReviewMixin):
     '''Набор отзывов.'''
     serializer_class = ReviewSerializer
     permission_classes = ReviewSerializer
 
-    def get_serializer_class(self):
-        review = self.kwargs['id']
-        return Review.objects.all(review=review)
 
-
-class CommentViewSet(viewsets.ModelViewSet):
+class CommentViewSet(viewsets.ModelViewSet, CommentReviewMixin):
     '''Набор комментариев.'''
     serializer_class = CommentSerializer
     permission_classes = CommentSerializer
