@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator
@@ -128,7 +129,7 @@ class Review(models.Model):
         verbose_name='author',
         on_delete=models.CASCADE
     )
-    pub_date = models.DateTimeField()
+    created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = 'Отзыв'
@@ -164,7 +165,7 @@ class Comment(models.Model):
         verbose_name='author',
         on_delete=models.CASCADE
     )
-    crated_at = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = 'Комментарий'
