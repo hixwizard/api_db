@@ -18,6 +18,7 @@ class Category(models.Model):
     )
 
     class Meta:
+        ordering = ('id',)
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
 
@@ -38,6 +39,7 @@ class Genre(models.Model):
     )
 
     class Meta:
+        ordering = ('id',)
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
 
@@ -67,10 +69,14 @@ class Title(models.Model):
     category = models.ForeignKey(
         Category,
         verbose_name='Категория',
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='titles'
     )
 
     class Meta:
+        ordering = ('id',)
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
 
@@ -83,11 +89,17 @@ class GenreTitle(models.Model):
     genre = models.ForeignKey(
         Genre,
         on_delete=models.CASCADE,
+        related_name='genres',
     )
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
+        related_name='titles',
     )
+
+    class Meta:
+        verbose_name = 'Жанр к произведению'
+        verbose_name_plural = 'Жанр к произведению'
 
 
 class Reviews(models.Model):
@@ -95,23 +107,26 @@ class Reviews(models.Model):
     title_id = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
-        verbose_name='ID произведения'
-    )
+        related_name='reviews',
+        verbose_name='ID произведения')
     text = models.TextField(
-        verbose_name='Текст отзыва'
-    )
+        verbose_name='Текст отзыва',)
     score = models.IntegerField(
-        verbose_name='Оценка'
-    )
+        verbose_name='Оценка')
     author = models.ForeignKey(
         User,
         verbose_name='Автор',
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        unique=True
     )
+    pub_date = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Время публикации',
+        db_index=True)
 
     class Meta:
         verbose_name = 'Отзыв'
-        verbose_name = 'Отзывы'
+        verbose_name_plural = 'Отзывы'
 
     def __str__(self) -> str:
         return self.text
@@ -128,6 +143,7 @@ class Comment(models.Model):
         Reviews,
         on_delete=models.CASCADE,
         verbose_name='ID отзыва',
+        related_name='comments'
     )
     text = models.TextField(
         verbose_name='Текст комментария',
@@ -136,6 +152,11 @@ class Comment(models.Model):
         User,
         verbose_name='Автор',
         on_delete=models.CASCADE
+    )
+    pub_date = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Время публикации',
+        db_index=True
     )
 
     class Meta:

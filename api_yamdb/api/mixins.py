@@ -8,6 +8,7 @@ class CreateListDestroyViewSet(mixins.CreateModelMixin,
                                mixins.DestroyModelMixin,
                                viewsets.GenericViewSet):
     """Вьюсет позволяет делать GET, POST, DELETE запросы"""
-    filter_backends = (filters.SearchFilter)
+    filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
-    permission_classes = AdminOrReadOnly
+    permission_classes = (AdminOrReadOnly,)
+    lookup_field = 'slug'
