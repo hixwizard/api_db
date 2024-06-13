@@ -5,7 +5,7 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 
 from reviews.models import (
-    Category, Genre, Title, Reviews)
+    Category, Genre, Title, Review)
 from .serializers import (
     CategorySerializer,
     GenreSerializer,
@@ -55,61 +55,54 @@ class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewsSerializer
     permission_classes = (
         IsAuthorIsModeratorIsAdminOrReadOnly,
-        permissions.IsAuthenticatedOrReadOnly
+        permissions.IsAuthenticatedOrReadOnly,
     )
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def perform_create(self, serializer):
-        title_id = get_object_or_404(
+        title = get_object_or_404(
             Title,
             pk=self.kwargs.get('title_id')
         )
         serializer.save(
             author=self.request.user,
-            title_id=title_id
+            title=title
         )
-        return Response(serializer.data,
-                        status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def get_queryset(self):
-        title_id = self.kwargs.get('title_id')
-        title = get_object_or_404(
-            Title,
-            pk=title_id
-        )
-        return title.reviews.all()
+        title = self.kwargs.get('title_id')
+        title = get_object_or_404(Title, pk=title)
+        return title.reviews.all().order_by('id')
 
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
-        IsAuthorIsModeratorIsAdminOrReadOnly
+        IsAuthorIsModeratorIsAdminOrReadOnly,
     )
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_queryset(self):
-        rewiew = get_object_or_404(
-            Reviews,
+        review = get_object_or_404(
+            Review,
             pk=self.kwargs.get('review_id')
         )
-        return rewiew.comments.all()
+        return review.comments.all().order_by('id')
 
     def perform_create(self, serializer):
-        review_id = get_object_or_404(
-            Reviews,
+        review = get_object_or_404(
+            Review,
             pk=self.kwargs.get('review_id')
         )
-        title_id = get_object_or_404(
+        title = get_object_or_404(
             Title,
             pk=self.kwargs.get('title_id')
         )
         serializer.save(
-            title_id=title_id,
+            title=title,
             author=self.request.user,
-            review_id=review_id,
+            review=review,
         )
-        return Response(
-            serializer.data,
-            status=status.HTTP_201_CREATED
-        )
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

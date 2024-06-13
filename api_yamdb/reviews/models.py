@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.db.models import UniqueConstraint
 
 from core.constants import NAME_MAX, SLUG_MAX
 User = get_user_model()
@@ -102,9 +103,9 @@ class GenreTitle(models.Model):
         verbose_name_plural = 'Жанр к произведению'
 
 
-class Reviews(models.Model):
+class Review(models.Model):
     """Модель отзыва."""
-    title_id = models.ForeignKey(
+    title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
         related_name='reviews',
@@ -117,7 +118,6 @@ class Reviews(models.Model):
         User,
         verbose_name='Автор',
         on_delete=models.CASCADE,
-        unique=True
     )
     pub_date = models.DateTimeField(
         auto_now=True,
@@ -134,13 +134,13 @@ class Reviews(models.Model):
 
 class Comment(models.Model):
     """Модель комментария."""
-    title_id = models.ForeignKey(
+    title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
         verbose_name='ID произведения'
     )
-    review_id = models.ForeignKey(
-        Reviews,
+    review = models.ForeignKey(
+        Review,
         on_delete=models.CASCADE,
         verbose_name='ID отзыва',
         related_name='comments'
