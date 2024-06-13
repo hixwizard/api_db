@@ -1,7 +1,8 @@
 from django.db.models import Avg
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, status
+from rest_framework.response import Response
 
 from reviews.models import (
     Category, Genre, Title, Reviews)
@@ -15,7 +16,7 @@ from .serializers import (
     TitleSerializer)
 from .filters import TitleFilter
 from .mixins import CreateListDestroyViewSet
-from .permissons import AdminOrReadOnly
+from .permissons import AdminOrReadOnly, IsAuthorIsModeratorIsAdminOrReadOnly
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -53,7 +54,10 @@ class GenreViewSet(CreateListDestroyViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewsSerializer
     permission_classes = (
+        IsAuthorIsModeratorIsAdminOrReadOnly,
+        permissions.IsAuthenticatedOrReadOnly
     )
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def perform_create(self, serializer):
         title_id = get_object_or_404(
@@ -64,6 +68,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
             author=self.request.user,
             title_id=title_id
         )
+        return Response(serializer.data,
+                        status=status.HTTP_201_CREATED)
 
     def get_queryset(self):
         title_id = self.kwargs.get('title_id')
@@ -78,22 +84,32 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
-        AdminOrReadOnly
+        IsAuthorIsModeratorIsAdminOrReadOnly
     )
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_queryset(self):
         rewiew = get_object_or_404(
             Reviews,
-            id=self.kwargs.get('rewiew_id')
+            pk=self.kwargs.get('review_id')
         )
-        return rewiew.comments.all
+        return rewiew.comments.all()
 
     def perform_create(self, serializer):
-        review = get_object_or_404(
+        review_id = get_object_or_404(
             Reviews,
-            id=self.kwargs.get('review_id')
+            pk=self.kwargs.get('review_id')
+        )
+        title_id = get_object_or_404(
+            Title,
+            pk=self.kwargs.get('title_id')
         )
         serializer.save(
+            title_id=title_id,
             author=self.request.user,
-            review=review
+            review_id=review_id,
+        )
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED
         )
