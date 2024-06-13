@@ -9,13 +9,11 @@ class Category(models.Model):
     """Модель категории."""
     name = models.CharField(
         max_length=NAME_MAX,
-        verbose_name='Название',
-    )
+        verbose_name='Название',)
     slug = models.SlugField(
         max_length=50,
         unique=True,
-        verbose_name='Slug'
-    )
+        verbose_name='Slug')
 
     class Meta:
         ordering = ('id',)
@@ -30,13 +28,11 @@ class Genre(models.Model):
     """Модель жанра."""
     name = models.CharField(
         max_length=NAME_MAX,
-        verbose_name='Название',
-    )
+        verbose_name='Название',)
     slug = models.SlugField(
         max_length=SLUG_MAX,
         unique=True,
-        verbose_name='Slug'
-    )
+        verbose_name='Slug')
 
     class Meta:
         ordering = ('id',)
@@ -51,29 +47,24 @@ class Title(models.Model):
     """Модель произведения."""
     name = models.CharField(
         max_length=NAME_MAX,
-        verbose_name='Название',
-    )
+        verbose_name='Название',)
     year = models.IntegerField(
-        verbose_name='Год',
-    )
+        verbose_name='Год',)
     description = models.TextField(
         verbose_name='Описание',
         null=True,
-        blank=True,
-    )
+        blank=True,)
     genre = models.ManyToManyField(
         Genre,
         verbose_name='Жанр',
-        through='GenreTitle',
-    )
+        through='GenreTitle',)
     category = models.ForeignKey(
         Category,
         verbose_name='Категория',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='titles'
-    )
+        related_name='titles')
 
     class Meta:
         ordering = ('id',)
@@ -89,13 +80,11 @@ class GenreTitle(models.Model):
     genre = models.ForeignKey(
         Genre,
         on_delete=models.CASCADE,
-        related_name='genres',
-    )
+        related_name='genres',)
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
-        related_name='titles',
-    )
+        related_name='titles',)
 
     class Meta:
         verbose_name = 'Жанр к произведению'
@@ -108,14 +97,11 @@ class Reviews(models.Model):
         Title,
         on_delete=models.CASCADE,
         related_name='reviews',
-        verbose_name='ID произведения'
-    )
+        verbose_name='ID произведения')
     text = models.TextField(
-        verbose_name='Текст отзыва',
-    )
+        verbose_name='Текст отзыва',)
     score = models.IntegerField(
-        verbose_name='Оценка'
-    )
+        verbose_name='Оценка')
     author = models.ForeignKey(
         User,
         verbose_name='Автор',
@@ -125,8 +111,7 @@ class Reviews(models.Model):
     pub_date = models.DateTimeField(
         auto_now=True,
         verbose_name='Время публикации',
-        db_index=True
-    )
+        db_index=True)
 
     class Meta:
         verbose_name = 'Отзыв'
