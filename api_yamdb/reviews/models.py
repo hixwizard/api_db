@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator
-from django.db.models import UniqueConstraint
 
 from core.constants import NAME_MAX, SLUG_MAX
 User = get_user_model()

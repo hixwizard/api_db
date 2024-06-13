@@ -2,6 +2,7 @@ from core.constants import USERNAME_MAX_LENGTH, EMAIL_MAX
 
 
 class ExtraKwargsMixin:
+    """Миксин валидации пользователей."""
     class Meta:
         extra_kwargs = {
             'username': {'max_length': USERNAME_MAX_LENGTH},

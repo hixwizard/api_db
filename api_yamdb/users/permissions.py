@@ -16,7 +16,7 @@ class IsAuthenticatedOrReadOnly(BasePermission):
 
 
 class AdminOnly(BasePermission):
-
+    """Правада доступа для персонала."""
     def has_permission(self, request, view):
         return (request.user.is_authenticated
                 and request.user.is_admin
