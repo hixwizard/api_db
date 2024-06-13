@@ -120,6 +120,7 @@ class Reviews(models.Model):
         User,
         verbose_name='Автор',
         on_delete=models.CASCADE,
+        unique=True
     )
     pub_date = models.DateTimeField(
         auto_now=True,
@@ -130,10 +131,6 @@ class Reviews(models.Model):
     class Meta:
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
-        constraints = [models.UniqueConstraint(
-            fields=['author'],
-            name='unique'
-        ),]
 
     def __str__(self) -> str:
         return self.text
