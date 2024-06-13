@@ -50,48 +50,65 @@ class GenreViewSet(CreateListDestroyViewSet):
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
-    '''Набор отзывов.'''
-    serializer_class = ReviewSerializer
-    permission_classes = (ReviewCommentPermission,)
-
-    def get_queryset(self):
-        return Title.objects.all(self.kwargs['title_id'])
-
-    def get_object(self):
-        return Title.objects.get(self.kwargs['title_id'])
+    serializer_class = ReviewsSerializer
+    permission_classes = (
+        IsAuthorIsModeratorIsAdminOrReadOnly,
+        permissions.IsAuthenticatedOrReadOnly
+    )
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def perform_create(self, serializer):
-        '''post'''
-        return super().perform_create(serializer)
+        title_id = get_object_or_404(
+            Title,
+            pk=self.kwargs.get('title_id')
+        )
+        serializer.save(
+            author=self.request.user,
+            title_id=title_id
+        )
+        return Response(serializer.data,
+                        status=status.HTTP_201_CREATED)
 
-    def partial_update(self, request, *args, **kwargs):
-        '''patch'''
-        return super().partial_update(request, *args, **kwargs)
-
-    def destroy(self, request, *args, **kwargs):
-        '''delete'''
-        return super().destroy(request, *args, **kwargs)
+    def get_queryset(self):
+        title_id = self.kwargs.get('title_id')
+        title = get_object_or_404(
+            Title,
+            pk=title_id
+        )
+        return title.reviews.all()
 
 
 class CommentViewSet(viewsets.ModelViewSet):
     '''Набор комментариев.'''
     serializer_class = CommentSerializer
-    permission_classes = (ReviewCommentPermission,)
+    permission_classes = (
+        permissions.IsAuthenticatedOrReadOnly,
+        IsAuthorIsModeratorIsAdminOrReadOnly
+    )
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_queryset(self):
-        return Review.objects.all(self.kwargs['title_id'])
-
-    def get_object(self):
-        return Review.objects.get(self.kwargs['title_id'])
+        rewiew = get_object_or_404(
+            Reviews,
+            pk=self.kwargs.get('review_id')
+        )
+        return rewiew.comments.all()
 
     def perform_create(self, serializer):
-        '''post'''
-        return super().perform_create(serializer)
-
-    def partial_update(self, request, *args, **kwargs):
-        '''patch'''
-        return super().partial_update(request, *args, **kwargs)
-
-    def destroy(self, request, *args, **kwargs):
-        '''delete'''
-        return super().destroy(request, *args, **kwargs)
+        review_id = get_object_or_404(
+            Reviews,
+            pk=self.kwargs.get('review_id')
+        )
+        title_id = get_object_or_404(
+            Title,
+            pk=self.kwargs.get('title_id')
+        )
+        serializer.save(
+            title_id=title_id,
+            author=self.request.user,
+            review_id=review_id,
+        )
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED
+        )
