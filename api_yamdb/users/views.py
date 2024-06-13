@@ -108,7 +108,7 @@ class TokenView(views.APIView):
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    """Набор отображений пользователей."""
+    """Представление пользователей."""
     queryset = UserModel.objects.all()
     serializer_class = UserCreateSerializer
     filter_backends = (SearchFilter,)

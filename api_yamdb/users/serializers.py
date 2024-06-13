@@ -9,6 +9,7 @@ from core.constants import USERNAME_MAX_LENGTH, MAX_CODE, EMAIL_MAX, MESSAGE
 
 
 class SignupSerializer(serializers.ModelSerializer):
+    '''Сериализатор регистриции.'''
     email = serializers.EmailField(max_length=EMAIL_MAX)
     username = serializers.CharField(
         max_length=USERNAME_MAX_LENGTH,
@@ -43,6 +44,7 @@ class SignupSerializer(serializers.ModelSerializer):
 
 
 class TokenSerializer(serializers.Serializer):
+    """Сериализатор токена."""
     username = serializers.CharField()
     confirmation_code = serializers.IntegerField(max_value=MAX_CODE)
 
@@ -68,7 +70,7 @@ class UserSerializer(serializers.ModelSerializer, ExtraKwargsMixin):
 
 
 class UserCreateSerializer(ExtraKwargsMixin, serializers.ModelSerializer):
-
+    """Сериализатор для создания пользователей."""
     class Meta:
         model = UserModel
         fields = [
