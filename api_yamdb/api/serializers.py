@@ -1,13 +1,13 @@
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
-from rest_framework import serializers, status
-from rest_framework.response import Response
+from rest_framework import serializers
 
 from reviews.models import Category, Genre, Title, Review, Comment
 
 
 class CategorySerializer(serializers.ModelSerializer):
     """Сериализатор категорий."""
+
     class Meta:
         model = Category
         fields = ('name', 'slug')
@@ -22,8 +22,8 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    """Сериализатор названий."""
-    rating = serializers.IntegerField(read_only=True, required=False)
+    """Общий сериализатор произведений."""
+    rating = serializers.IntegerField(read_only=True,)
 
     class Meta:
         model = Title
@@ -39,7 +39,7 @@ class TitleSerializer(serializers.ModelSerializer):
 
 
 class TitlePostSerializer(TitleSerializer):
-    """Что это ? :) сериализатор связаной модели, я не понимаю :)"""
+    """Сериализатор добавления и изменения произведений."""
     genre = serializers.SlugRelatedField(
         queryset=Genre.objects.all(),
         slug_field='slug',
@@ -52,15 +52,17 @@ class TitlePostSerializer(TitleSerializer):
 
 
 class TitleGetSerializer(TitleSerializer):
-    """И это тоже не понимаю :)"""
+    """Сериализатор получения произведений."""
     genre = GenreSerializer(read_only=True, many=True)
     category = CategorySerializer(read_only=True)
 
 
 class ReviewsSerializer(serializers.ModelSerializer):
-    """Сериализатор отзывов"""
-    author = serializers.StringRelatedField(read_only=True)
-    id = serializers.PrimaryKeyRelatedField(read_only=True)
+    """Сериализатор отзывов."""
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username'
+    )
 
     def validate(self, attrs):
         request = self.context.get('request')
@@ -85,15 +87,6 @@ class CommentSerializer(serializers.ModelSerializer):
         slug_field='username'
     )
 
-    def validate(self, attrs):
-        if self.context.get('request').method == 'PUT':
-            return Response(
-                data="PUT запрос не предусмотрен",
-                status=status.HTTP_405_METHOD_NOT_ALLOWED
-            )
-        return attrs
-
     class Meta:
         model = Comment
         fields = ('id', 'text', 'author', 'pub_date',)
-        read_only_fields = ('author', 'post')

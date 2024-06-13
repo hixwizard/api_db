@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator
 
 from core.constants import NAME_MAX, SLUG_MAX
+
 User = get_user_model()
 
 

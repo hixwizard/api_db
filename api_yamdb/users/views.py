@@ -16,7 +16,7 @@ from .permissions import AdminOnly
 
 
 class SignupView(views.APIView):
-    '''Запрос регистрации и ответ с кодом аутентификации.'''
+    """Запрос регистрации и ответ с кодом аутентификации."""
     permission_classes = (AllowAny,)
 
     def post(self, request):
@@ -66,7 +66,7 @@ class SignupView(views.APIView):
 
 
 class TokenView(views.APIView):
-    '''Получение токена по коду подтверждения.'''
+    """Получение токена по коду подтверждения."""
     permission_classes = (AllowAny,)
 
     def post(self, request):

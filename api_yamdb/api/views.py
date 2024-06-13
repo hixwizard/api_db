@@ -1,8 +1,7 @@
 from django.db.models import Avg
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, permissions, status
-from rest_framework.response import Response
+from rest_framework import viewsets, permissions
 
 from reviews.models import (
     Category, Genre, Title, Review)
@@ -13,17 +12,15 @@ from .serializers import (
     CommentSerializer,
     TitleGetSerializer,
     TitlePostSerializer,
-    TitleSerializer)
+)
 from .filters import TitleFilter
 from .mixins import CreateListDestroyViewSet
 from .permissons import AdminOrReadOnly, IsAuthorIsModeratorIsAdminOrReadOnly
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    """Набор названий."""
+    """Представление произведений."""
     queryset = Title.objects.all()
-    serializer_class = TitleSerializer
-
     permission_classes = (AdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
@@ -40,18 +37,19 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 
 class CategoryViewSet(CreateListDestroyViewSet):
-    """Набор категорий."""
+    """Представление категорий."""
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
 
 class GenreViewSet(CreateListDestroyViewSet):
-    """Набор жанров."""
+    """Представление жанров."""
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
+    """Представление отзывов."""
     serializer_class = ReviewsSerializer
     permission_classes = (
         IsAuthorIsModeratorIsAdminOrReadOnly,
@@ -68,7 +66,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
             author=self.request.user,
             title=title
         )
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def get_queryset(self):
         title = self.kwargs.get('title_id')
@@ -77,6 +74,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 
 class CommentViewSet(viewsets.ModelViewSet):
+    """Представление комментариев."""
     serializer_class = CommentSerializer
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
@@ -105,4 +103,3 @@ class CommentViewSet(viewsets.ModelViewSet):
             author=self.request.user,
             review=review,
         )
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
