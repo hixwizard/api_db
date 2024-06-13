@@ -5,7 +5,7 @@ from django.core.validators import RegexValidator
 
 from .mixins import ExtraKwargsMixin
 from .models import UserModel
-from core.constants import USERNAME_MAX_LENGTH, MAX_CODE, EMAIL_MAX, MESSAGE, CODE_LENGTH
+from core.constants import USERNAME_MAX_LENGTH, MAX_CODE, EMAIL_MAX, MESSAGE
 
 
 class SignupSerializer(serializers.ModelSerializer):
@@ -14,7 +14,7 @@ class SignupSerializer(serializers.ModelSerializer):
         max_length=USERNAME_MAX_LENGTH,
         validators=[RegexValidator(
             regex=r'^[\w.@+-]+$',
-            message='Имя пользователя должно содержать только допустимые символы',
+            message=MESSAGE,
         )]
     )
 

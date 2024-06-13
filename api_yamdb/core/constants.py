@@ -5,7 +5,7 @@ MIN_CODE = 1000
 MAX_CODE = 99999
 CODE_LENGTH = 4
 EMAIL_MAX = 254
-
+FIVE_MIN = 300
 ROLE_CHOICES = {
     'user': 'user',
     'admin': 'admin',

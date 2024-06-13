@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
-from rest_framework import serializers, status, validators
+from rest_framework import serializers, status
 from rest_framework.response import Response
 
 from reviews.models import Category, Genre, Title, Review, Comment
@@ -39,6 +39,7 @@ class TitleSerializer(serializers.ModelSerializer):
 
 
 class TitlePostSerializer(TitleSerializer):
+    """Что это ? :) сериализатор связаной модели, я не понимаю :)"""
     genre = serializers.SlugRelatedField(
         queryset=Genre.objects.all(),
         slug_field='slug',
@@ -51,6 +52,7 @@ class TitlePostSerializer(TitleSerializer):
 
 
 class TitleGetSerializer(TitleSerializer):
+    """И это тоже не понимаю :)"""
     genre = GenreSerializer(read_only=True, many=True)
     category = CategorySerializer(read_only=True)
 
@@ -73,13 +75,7 @@ class ReviewsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Review
-        fields = (
-            'id',
-            'author',
-            'text',
-            'score',
-            'pub_date'
-        )
+        fields = ('id', 'author', 'text', 'score', 'pub_date')
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -99,13 +95,5 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = (
-            'id',
-            'text',
-            'author',
-            'pub_date',
-        )
-        read_only_fields = (
-            'author',
-            'post',
-        )
+        fields = ('id', 'text', 'author', 'pub_date',)
+        read_only_fields = ('author', 'post')
