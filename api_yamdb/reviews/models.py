@@ -104,70 +104,62 @@ class GenreTitle(models.Model):
         verbose_name_plural = 'Жанр к произведению'
 
 
-class Review(models.Model):
-    """
-    список(title), 200, 404
-    объект индекса(title, review), 200 obj id
-    post(jwt, text, score), auth
-    !patch(admin or owner),
-    !delete(admin or owner)
-    """
-    title = models.ForeignKey(
-        UserModel,
+class Reviews(models.Model):
+    """Модель отзыва."""
+    title_id = models.ForeignKey(
+        Title,
         on_delete=models.CASCADE,
         related_name='reviews',
-        verbose_name='title'
-    )
+        verbose_name='ID произведения')
     text = models.TextField(
-        verbose_name='Текст отзыва'
-    )
-    score = models.PositiveIntegerField(
-        validators=[MaxValueValidator(10),],
-        verbose_name='score',
-    )
+        verbose_name='Текст отзыва',)
+    score = models.IntegerField(
+        verbose_name='Оценка')
     author = models.ForeignKey(
         User,
-        verbose_name='author',
-        on_delete=models.CASCADE
+        verbose_name='Автор',
+        on_delete=models.CASCADE,
+        unique=True
     )
-    created = models.DateTimeField(auto_now_add=True)
+    pub_date = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Время публикации',
+        db_index=True)
 
     class Meta:
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
-        ordering = ('-pub_date',)
 
     def __str__(self) -> str:
         return self.text
 
 
 class Comment(models.Model):
-    """
-    get 200, 404 list allow any
-    get obj com-rev
-    post pk-rev
-    !patch admin or owner
-    !delete admin or owner
-    """
-    title = models.ForeignKey(
-        Review,
+    """Модель комментария."""
+    title_id = models.ForeignKey(
+        Title,
         on_delete=models.CASCADE,
-        verbose_name='title'
+        verbose_name='ID произведения'
     )
-    review = models.ForeignKey( # ?
-        Review,
+    review_id = models.ForeignKey(
+        Reviews,
         on_delete=models.CASCADE,
-        verbose_name='review',
+        verbose_name='ID отзыва',
+        related_name='comments'
     )
     text = models.TextField(
-        verbose_name='comment text',
+        verbose_name='Текст комментария',
     )
     author = models.ForeignKey(
         User,
-        verbose_name='author',
+        verbose_name='Автор',
         on_delete=models.CASCADE
     )
-    created = models.DateTimeField(auto_now_add=True)
+    pub_date = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Время публикации',
+        db_index=True
+    )
 
     class Meta:
         verbose_name = 'Комментарий'
