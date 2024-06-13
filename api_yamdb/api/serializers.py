@@ -1,5 +1,6 @@
+from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
-from rest_framework import serializers, status
+from rest_framework import serializers, status, validators
 from rest_framework.response import Response
 
 from reviews.models import Category, Genre, Title, Review, Comment
@@ -64,7 +65,8 @@ class ReviewsSerializer(serializers.ModelSerializer):
         if request.method == 'POST':
             author = request.user
             title_id = self.context.get('view').kwargs.get('title_id')
-            if Review.objects.filter(author=author, title_id=title_id).exists():
+            title = get_object_or_404(Title, pk=title_id)
+            if Review.objects.filter(author=author, title_id=title).exists():
                 raise serializers.ValidationError(
                     'Нельзя создать повторный отзыв на это произведение')
         return attrs

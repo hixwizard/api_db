@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.core.validators import MaxValueValidator
 from django.db.models import UniqueConstraint
 
 from core.constants import NAME_MAX, SLUG_MAX
@@ -112,8 +113,11 @@ class Review(models.Model):
         verbose_name='ID произведения')
     text = models.TextField(
         verbose_name='Текст отзыва',)
-    score = models.IntegerField(
-        verbose_name='Оценка')
+    score = models.PositiveIntegerField(
+        validators=[MaxValueValidator(10),],
+        verbose_name='Оценка',
+    )
+
     author = models.ForeignKey(
         User,
         verbose_name='Автор',
@@ -127,6 +131,12 @@ class Review(models.Model):
     class Meta:
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['title', 'author'],
+                name='unique_review_from_author'
+            )
+        ]
 
     def __str__(self) -> str:
         return self.text
