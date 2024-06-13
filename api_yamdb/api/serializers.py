@@ -55,23 +55,68 @@ class TitleGetSerializer(TitleSerializer):
     category = CategorySerializer(read_only=True)
 
 
-class ReviewSerializer(serializers.ModelSerializer):
-    """Сериализатор отзывов."""
+class ReviewsSerializer(serializers.ModelSerializer):
+    """Сериализатор отзывов"""
     author = serializers.StringRelatedField(
         read_only=True,
     )
-    title = serializers.IntegerField(
-        required=False,
-    )
+    id = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    def validate(self, attrs):
+        if not self.context.get('request').method == 'POST':
+            return attrs
+        if self.context.get('request').method == 'PUT':
+            return Response(
+                data="PUT запрос не предусмотрен",
+                status=status.HTTP_405_METHOD_NOT_ALLOWED
+            )
+        author = self.context.get('request').user
+        title_id = self.context.get('view').kwargs.get('id')
+        if Reviews.objects.filter(
+            author=author,
+            title_id=title_id
+        ).exists():
+            return Response(
+                data='Нельзя создать повторный отзыв на это произведение',
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        return attrs
 
     class Meta:
-        model = Review
-        fields = ('title', 'author', 'text', 'score')
+        model = Reviews
+        fields = (
+            'id',
+            'author',
+            'text',
+            'score',
+            'pub_date'
+        )
 
 
 class CommentSerializer(serializers.ModelSerializer):
     """Сериализатор комментариев."""
+    author = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username'
+    )
+
+    def validate(self, attrs):
+        if self.context.get('request').method == 'PUT':
+            return Response(
+                data="PUT запрос не предусмотрен",
+                status=status.HTTP_405_METHOD_NOT_ALLOWED
+            )
+        return attrs
 
     class Meta:
         model = Comment
-        fields = ('text',)
+        fields = (
+            'id',
+            'text',
+            'author',
+            'pub_date',
+        )
+        read_only_fields = (
+            'author',
+            'post',
+        )
