@@ -1,6 +1,6 @@
 from rest_framework import filters, mixins, viewsets
 
-from .permissons import AdminOrReadOnly
+from .permissons import IsAdminOrReadOnly
 
 from core.constants import USERNAME_MAX_LENGTH, EMAIL_MAX
 
@@ -12,7 +12,7 @@ class CreateListDestroyViewSet(mixins.CreateModelMixin,
     """Вьюсет позволяет делать GET, POST, DELETE запросы"""
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
-    permission_classes = (AdminOrReadOnly,)
+    permission_classes = (IsAdminOrReadOnly,)
     lookup_field = 'slug'
 
 

@@ -1,7 +1,7 @@
 from rest_framework import permissions
 
 
-class AdminOrReadOnly(permissions.BasePermission):
+class IsAdminOrReadOnly(permissions.BasePermission):
     """Доступ админу или только для чтения."""
 
     def has_permission(self, request, view):
@@ -17,7 +17,7 @@ class IsAuthorIsModeratorIsAdminOrReadOnly(permissions.BasePermission):
         return (request.method in permissions.SAFE_METHODS
                 or request.user.is_authenticated
                 and (request.user == obj.author
-                     or request.user.role == 'moderator'
+                     or request.user.is_moderator
                      or request.user.is_admin
                      or request.user.is_superuser
                      )
