@@ -26,7 +26,7 @@ from .serializers import (
 from .filters import TitleFilter
 from .mixins import CreateListDestroyViewSet
 from .permissons import (
-    AdminOrReadOnly,
+    IsAdminOrReadOnly,
     IsAuthorIsModeratorIsAdminOrReadOnly,
     AdminOnly)
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -38,7 +38,7 @@ from core.constants import MIN_CODE, MAX_CODE, FIVE_MIN
 class TitleViewSet(viewsets.ModelViewSet):
     """Представление произведений."""
     queryset = Title.objects.all()
-    permission_classes = (AdminOrReadOnly,)
+    permission_classes = (IsAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
     http_method_names = ('get', 'post', 'patch', 'delete')
