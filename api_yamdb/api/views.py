@@ -29,7 +29,7 @@ from .permissons import (
     AdminOrReadOnly,
     IsAuthorIsModeratorIsAdminOrReadOnly,
     AdminOnly)
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from users.models import UserModel
 from core.constants import MIN_CODE, MAX_CODE, FIVE_MIN
@@ -37,8 +37,7 @@ from core.constants import MIN_CODE, MAX_CODE, FIVE_MIN
 
 class TitleViewSet(viewsets.ModelViewSet):
     """Представление произведений."""
-    queryset = Title.objects.all()
-    permission_classes = (AdminOrReadOnly,)
+    permission_classes = (AdminOrReadOnly, IsAuthenticatedOrReadOnly)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
     http_method_names = ('get', 'post', 'patch', 'delete')
