@@ -1,35 +1,15 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator
+from django.utils.timezone import now
 
 from core.constants import NAME_MAX, SLUG_MAX
 
 User = get_user_model()
 
 
-class Category(models.Model):
-    """Модель категории."""
-    name = models.CharField(
-        max_length=NAME_MAX,
-        verbose_name='Название',
-    )
-    slug = models.SlugField(
-        max_length=50,
-        unique=True,
-        verbose_name='Slug'
-    )
-
-    class Meta:
-        ordering = ('id',)
-        verbose_name = 'Категория'
-        verbose_name_plural = 'Категории'
-
-    def __str__(self) -> str:
-        return self.name
-
-
-class Genre(models.Model):
-    """Модель жанра."""
+class BaseModel(models.Model):
+    """Абстрактная модель"""
     name = models.CharField(
         max_length=NAME_MAX,
         verbose_name='Название',
@@ -41,12 +21,28 @@ class Genre(models.Model):
     )
 
     class Meta:
-        ordering = ('id',)
-        verbose_name = 'Жанр'
-        verbose_name_plural = 'Жанры'
+        abstract = True
 
     def __str__(self) -> str:
         return self.name
+
+
+class Category(BaseModel):
+    """Модель категории."""
+
+    class Meta:
+        ordering = ('id',)
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
+
+
+class Genre(BaseModel):
+    """Модель жанра."""
+
+    class Meta:
+        ordering = ('id',)
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
 
 
 class Title(models.Model):
@@ -55,8 +51,9 @@ class Title(models.Model):
         max_length=NAME_MAX,
         verbose_name='Название',
     )
-    year = models.IntegerField(
+    year = models.PositiveSmallIntegerField(
         verbose_name='Год',
+        validators=[MaxValueValidator(now().year)]
     )
     description = models.TextField(
         verbose_name='Описание',
