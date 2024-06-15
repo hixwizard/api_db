@@ -28,7 +28,8 @@ from .mixins import CreateListDestroyViewSet
 from .permissons import (
     IsAdminIsAuthOrReadOnly,
     IsAuthorIsModeratorIsAdminIsAuthOrReadOnly,
-    AdminOnly)
+    AdminOnly,
+    IsAuthenticatedOrReadOnly)
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from users.models import UserModel
