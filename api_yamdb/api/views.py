@@ -26,8 +26,8 @@ from .serializers import (
 from .filters import TitleFilter
 from .mixins import CreateListDestroyViewSet
 from .permissons import (
-    IsAdminOrReadOnly,
-    IsAuthorIsModeratorIsAdminOrReadOnly,
+    IsAdminIsAuthOrReadOnly,
+    IsAuthorIsModeratorIsAdminIsAuthOrReadOnly,
     AdminOnly)
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -38,7 +38,7 @@ from core.constants import MIN_CODE, MAX_CODE, FIVE_MIN
 class TitleViewSet(viewsets.ModelViewSet):
     """Представление произведений."""
     queryset = Title.objects.all()
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = (IsAdminIsAuthOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
     http_method_names = ('get', 'post', 'patch', 'delete')
@@ -69,7 +69,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     """Представление отзывов."""
     serializer_class = ReviewsSerializer
     permission_classes = (
-        IsAuthorIsModeratorIsAdminOrReadOnly,
+        IsAuthorIsModeratorIsAdminIsAuthOrReadOnly,
         permissions.IsAuthenticatedOrReadOnly,
     )
     http_method_names = ['get', 'post', 'patch', 'delete']
@@ -95,7 +95,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
-        IsAuthorIsModeratorIsAdminOrReadOnly,
+        IsAuthorIsModeratorIsAdminIsAuthOrReadOnly,
     )
     http_method_names = ['get', 'post', 'patch', 'delete']
 
