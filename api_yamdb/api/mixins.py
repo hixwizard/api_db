@@ -1,4 +1,4 @@
-from rest_framework import filters, mixins, viewsets
+from rest_framework import filters, mixins, viewsets, permissions
 
 from .permissons import IsAdminIsAuthOrReadOnly
 
@@ -12,7 +12,7 @@ class CreateListDestroyViewSet(mixins.CreateModelMixin,
     """Вьюсет позволяет делать GET, POST, DELETE запросы"""
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
-    permission_classes = (IsAdminIsAuthOrReadOnly,)
+    permission_classes = (IsAdminIsAuthOrReadOnly, permissions.IsAuthenticatedOrReadOnly)
     lookup_field = 'slug'
 
 
