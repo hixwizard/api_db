@@ -26,10 +26,13 @@ from .serializers import (
 from .filters import TitleFilter
 from .mixins import CreateListDestroyViewSet
 from .permissons import (
-    IsAdminOrReadOnly,
-    IsAuthorIsModeratorIsAdminOrReadOnly,
+    IsAdminIsAuthOrReadOnly,
+    IsAuthorIsModeratorIsAdminIsAuthOrReadOnly,
     AdminOnly)
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import (
+    AllowAny,
+    IsAuthenticated,
+    IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from users.models import UserModel
 from core.constants import MIN_CODE, MAX_CODE, FIVE_MIN
@@ -37,7 +40,9 @@ from core.constants import MIN_CODE, MAX_CODE, FIVE_MIN
 
 class TitleViewSet(viewsets.ModelViewSet):
     """Представление произведений."""
-    permission_classes = (IsAdminOrReadOnly, IsAuthenticatedOrReadOnly)
+    permission_classes = (
+        IsAdminIsAuthOrReadOnly,
+        IsAuthenticatedOrReadOnly)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
     http_method_names = ('get', 'post', 'patch', 'delete')
@@ -68,7 +73,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     """Представление отзывов."""
     serializer_class = ReviewsSerializer
     permission_classes = (
-        IsAuthorIsModeratorIsAdminOrReadOnly,
+        IsAuthorIsModeratorIsAdminIsAuthOrReadOnly,
         permissions.IsAuthenticatedOrReadOnly,
     )
     http_method_names = ['get', 'post', 'patch', 'delete']
@@ -94,7 +99,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (
         permissions.IsAuthenticatedOrReadOnly,
-        IsAuthorIsModeratorIsAdminOrReadOnly,
+        IsAuthorIsModeratorIsAdminIsAuthOrReadOnly,
     )
     http_method_names = ['get', 'post', 'patch', 'delete']
 
