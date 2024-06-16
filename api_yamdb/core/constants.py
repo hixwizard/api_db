@@ -14,3 +14,5 @@ ROLE_CHOICES = {
 
 ROLE_CHOICES_LIST = [(key, value) for key, value in ROLE_CHOICES.items()]
 MESSAGE = 'Имя не должно содержать недопустимых символов.'
+STOP_NAME = 'me'
+ADMIN_USER = 'admin-user@admin.ru'

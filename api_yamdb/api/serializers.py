@@ -2,12 +2,13 @@ from django.utils.timezone import now
 from rest_framework import serializers
 from rest_framework.serializers import ValidationError
 from rest_framework import serializers
-from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.validators import RegexValidator
+from django.contrib.auth.tokens import default_token_generator
 
 from .mixins import ExtraKwargsMixin
 from users.models import UserModel
-from core.constants import USERNAME_MAX_LENGTH, MAX_CODE, EMAIL_MAX, MESSAGE
+from core.constants import (
+    USERNAME_MAX_LENGTH, MAX_CODE, EMAIL_MAX, MESSAGE, STOP_NAME)
 from reviews.models import Category, Genre, Title, Review, Comment
 
 
@@ -97,8 +98,8 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = ('id', 'text', 'author', 'pub_date',)
 
 
-class SignupSerializer(serializers.ModelSerializer):
-    '''Сериализатор регистриции.'''
+class SignupSerializer(serializers.Serializer):
+    """Сериализатор регистриции."""
     email = serializers.EmailField(max_length=EMAIL_MAX)
     username = serializers.CharField(
         max_length=USERNAME_MAX_LENGTH,
@@ -113,18 +114,22 @@ class SignupSerializer(serializers.ModelSerializer):
         fields = ('email', 'username')
 
     def validate_username(self, value):
-        if value.lower() == 'me':
-            raise ValidationError('Имя "me" уже занято.')
+        if value.lower() == STOP_NAME:
+            raise ValidationError(f'Имя {STOP_NAME} уже занято.')
         return value
 
     def validate_email(self, value):
         if len(value) > EMAIL_MAX:
             raise ValidationError(
-                'Email не может быть длиннее 254 символов.'
+                f'Email не может быть длиннее {EMAIL_MAX} символов.'
             )
         return value
 
     def validate(self, data):
+        if UserModel.objects.filter(
+                email=data['email'], username=data['username']).exists():
+            return serializers.ValidationError(
+                'Пользователь уже зарегистрирован.')
         if UserModel.objects.filter(email=data['email']).exists():
             raise serializers.ValidationError('Такая почта уже используется.')
         if UserModel.objects.filter(username=data['username']).exists():
@@ -139,11 +144,7 @@ class TokenSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         user = UserModel.objects.get(username=validated_data['username'])
-        refresh = RefreshToken.for_user(user)
-        return {
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-        }
+        return default_token_generator(user)
 
 
 class UserSerializer(serializers.ModelSerializer, ExtraKwargsMixin):
