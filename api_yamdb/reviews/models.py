@@ -134,6 +134,7 @@ class Review(models.Model):
                 name='unique_review_from_author'
             )
         ]
+        ordering = ('id',)
 
     def __str__(self) -> str:
         return self.text
