@@ -35,7 +35,7 @@ from rest_framework.permissions import (
     IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from users.models import UserModel
-from core.constants import MIN_CODE, MAX_CODE, FIVE_MIN
+from core.constants import MIN_CODE, MAX_CODE, FIVE_MIN, ADMIN_USER
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -132,24 +132,10 @@ class SignupView(views.APIView):
 
     def post(self, request):
         serializer = SignupSerializer(data=request.data)
-        email = request.data.get('email')
-        username = request.data.get('username')
-        if UserModel.objects.filter(email=email).exists():
-            if UserModel.objects.filter(username=username).exists():
-                return Response(
-                    {'detail': 'Пользователь уже зарегистрирован.'},
-                    status=status.HTTP_200_OK
-                )
-            else:
-                return Response(
-                    {'detail':
-                     'Пользователь с таким email уже зарегистрирован.'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-        serializer = SignupSerializer(data=request.data)
+        email, username = request.data.get('email', 'username')
         if serializer.is_valid():
-            email = serializer.validated_data.get('email')
-            username = serializer.validated_data.get('username')
+            email = serializer.validated_data.get('username')
+            username = serializer.validated_data.get('email')
             confirmation_code = str(random.randint(MIN_CODE, MAX_CODE))
             cache_key = f'confirmation_code_{username}'
             cache.set(cache_key, confirmation_code, timeout=FIVE_MIN)
@@ -165,7 +151,7 @@ class SignupView(views.APIView):
             send_mail(
                 'Код подтверждения для входа.',
                 f'Ваш код подтверждения {confirmation_code}',
-                'noreply@example.com',
+                f'{ADMIN_USER}',
                 [email],
                 fail_silently=False,
             )
