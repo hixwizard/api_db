@@ -40,9 +40,7 @@ from core.constants import MIN_CODE, MAX_CODE, FIVE_MIN
 
 class TitleViewSet(viewsets.ModelViewSet):
     """Представление произведений."""
-    permission_classes = (
-        IsAdminIsAuthOrReadOnly,
-        IsAuthenticatedOrReadOnly)
+    permission_classes = (IsAdminIsAuthOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
     http_method_names = ('get', 'post', 'patch', 'delete')
