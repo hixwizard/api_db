@@ -8,6 +8,7 @@ from api.views import (
     CommentViewSet,
     ReviewViewSet)
 
+app_name = 'api'
 
 router_v1 = DefaultRouter()
 router_v1.register('titles', TitleViewSet, basename='titles')
