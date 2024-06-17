@@ -98,7 +98,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class SignupSerializer(serializers.ModelSerializer):
-    '''Сериализатор регистриции.'''
+    """Сериализатор регистриции."""
     email = serializers.EmailField(max_length=EMAIL_MAX)
     username = serializers.CharField(
         max_length=USERNAME_MAX_LENGTH,

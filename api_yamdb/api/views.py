@@ -3,14 +3,13 @@ from django.db.models import Avg
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
+from django.core.cache import cache
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
-from django.core.cache import cache
 from rest_framework import viewsets, permissions, status, views, viewsets
+from rest_framework.response import Response
 
-
-from reviews.models import (
-    Category, Genre, Title, Review)
+from reviews.models import Category, Genre, Title, Review
 from .serializers import (
     CategorySerializer,
     GenreSerializer,
@@ -28,12 +27,8 @@ from .mixins import CreateListDestroyViewSet
 from .permissons import (
     IsAdminIsAuthOrReadOnly,
     IsAuthorIsModeratorIsAdminIsAuthOrReadOnly,
-    AdminOnly)
-from rest_framework.permissions import (
-    AllowAny,
-    IsAuthenticated,
-    IsAuthenticatedOrReadOnly)
-from rest_framework.response import Response
+    IsAdminOnly
+)
 from users.models import UserModel
 from core.constants import MIN_CODE, MAX_CODE, FIVE_MIN
 
@@ -70,10 +65,7 @@ class GenreViewSet(CreateListDestroyViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     """Представление отзывов."""
     serializer_class = ReviewsSerializer
-    permission_classes = (
-        IsAuthorIsModeratorIsAdminIsAuthOrReadOnly,
-        permissions.IsAuthenticatedOrReadOnly,
-    )
+    permission_classes = (IsAuthorIsModeratorIsAdminIsAuthOrReadOnly,)
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def perform_create(self, serializer):
@@ -95,10 +87,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     """Представление комментариев."""
     serializer_class = CommentSerializer
-    permission_classes = (
-        permissions.IsAuthenticatedOrReadOnly,
-        IsAuthorIsModeratorIsAdminIsAuthOrReadOnly,
-    )
+    permission_classes = (IsAuthorIsModeratorIsAdminIsAuthOrReadOnly,)
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_queryset(self):
@@ -126,7 +115,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 class SignupView(views.APIView):
     """Запрос регистрации и ответ с кодом аутентификации."""
-    permission_classes = (AllowAny,)
+    permission_classes = (permissions.AllowAny,)
 
     def post(self, request):
         serializer = SignupSerializer(data=request.data)
@@ -176,7 +165,7 @@ class SignupView(views.APIView):
 
 class TokenView(views.APIView):
     """Получение токена по коду подтверждения."""
-    permission_classes = (AllowAny,)
+    permission_classes = (permissions.AllowAny,)
 
     def post(self, request):
         serializer = TokenSerializer(data=request.data)
@@ -223,11 +212,11 @@ class UserViewSet(viewsets.ModelViewSet):
     filter_backends = (SearchFilter,)
     search_fields = ('username',)
     lookup_field = 'username'
-    permission_classes = (AdminOnly,)
+    permission_classes = (IsAdminOnly,)
     http_method_names = ('get', 'post', 'patch', 'delete')
 
     @action(methods=['get', 'patch'], detail=False, url_path='me',
-            permission_classes=(IsAuthenticated,))
+            permission_classes=(permissions.IsAuthenticated,))
     def get_my_profile(self, request):
         serializer = UserSerializer(request.user, partial=True,
                                     data=request.data)
