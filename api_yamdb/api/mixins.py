@@ -1,4 +1,4 @@
-from rest_framework import filters, mixins, viewsets, permissions
+from rest_framework import filters, mixins, viewsets
 
 from .permissons import IsAdminIsAuthOrReadOnly
 
