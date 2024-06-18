@@ -118,10 +118,14 @@ class SignupView(views.APIView):
         serializer = SignupSerializer(data=request.data)
         if serializer.is_valid():
             user, created = serializer.save()
-            return Response(
-                {'username': user.username, 'email': user.email},
-                status=status.HTTP_200_OK
-            )
+            if created:
+                return Response(
+                    {'username': user.username, 'email': user.email},
+                    status=status.HTTP_200_OK)
+            else:
+                return Response(
+                    {'detail': 'Пользователь уже зарегистрирован.'},
+                    status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
