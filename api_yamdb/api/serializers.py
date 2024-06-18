@@ -1,13 +1,17 @@
+import random
+from django.core.mail import send_mail
 from django.utils.timezone import now
 from rest_framework import serializers
 from rest_framework.serializers import ValidationError
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.validators import RegexValidator
+from django.core.cache import cache
 
 from .mixins import ExtraKwargsMixin
 from users.models import UserModel
-from core.constants import USERNAME_MAX_LENGTH, MAX_CODE, EMAIL_MAX, MESSAGE
+from core.constants import (USERNAME_MAX_LENGTH, MAX_CODE, EMAIL_MAX, MESSAGE,
+                            MIN_CODE, MAX_CODE, FIVE_MIN, ADMIN_EMAIL)
 from reviews.models import Category, Genre, Title, Review, Comment
 
 
@@ -97,8 +101,8 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = ('id', 'text', 'author', 'pub_date',)
 
 
-class SignupSerializer(serializers.ModelSerializer):
-    """Сериализатор регистриции."""
+class SignupSerializer(serializers.Serializer):
+    """Сериализатор регистрации."""
     email = serializers.EmailField(max_length=EMAIL_MAX)
     username = serializers.CharField(
         max_length=USERNAME_MAX_LENGTH,
@@ -108,28 +112,45 @@ class SignupSerializer(serializers.ModelSerializer):
         )]
     )
 
-    class Meta:
-        model = UserModel
-        fields = ('email', 'username')
-
-    def validate_username(self, value):
-        if value.lower() == 'me':
-            raise ValidationError('Имя "me" уже занято.')
-        return value
-
-    def validate_email(self, value):
-        if len(value) > EMAIL_MAX:
-            raise ValidationError(
-                'Email не может быть длиннее 254 символов.'
-            )
-        return value
-
     def validate(self, data):
-        if UserModel.objects.filter(email=data['email']).exists():
+        email = data.get('email')
+        username = data.get('username')
+        if username.lower() == 'me':
+            raise serializers.ValidationError('Имя "me" уже занято.')
+        if len(email) > EMAIL_MAX:
+            raise serializers.ValidationError(
+                'Email не может быть длиннее 254 символов.')
+        email_exists = UserModel.objects.filter(email=email).exists()
+        username_exists = UserModel.objects.filter(username=username).exists()
+        if email_exists and not username_exists:
+            raise serializers.ValidationError(
+                'Такая почта уже используется, но имя пользователя свободно.')
+        if email_exists:
             raise serializers.ValidationError('Такая почта уже используется.')
-        if UserModel.objects.filter(username=data['username']).exists():
+        if username_exists:
             raise serializers.ValidationError('Имя пользователя занято.')
         return data
+
+    def create(self, validated_data):
+        username = validated_data['username']
+        email = validated_data['email']
+        confirmation_code = str(random.randint(MIN_CODE, MAX_CODE))
+        user, created = UserModel.objects.get_or_create(
+            username=username,
+            defaults={'email': email})
+        if not created and user.email != email:
+            raise serializers.ValidationError('Такая почта уже используется.')
+        user.confirmation_code = confirmation_code
+        user.save()
+        cache_key = f'confirmation_code_{username}'
+        cache.set(cache_key, confirmation_code, timeout=FIVE_MIN)
+        send_mail(
+            'Код подтверждения для входа.',
+            f'Ваш код подтверждения {confirmation_code}',
+            ADMIN_EMAIL,
+            [email],
+            fail_silently=False,)
+        return user, created
 
 
 class TokenSerializer(serializers.Serializer):

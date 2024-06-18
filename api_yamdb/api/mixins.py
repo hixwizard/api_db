@@ -1,7 +1,6 @@
 from rest_framework import filters, mixins, viewsets
 
 from .permissons import IsAdminIsAuthOrReadOnly
-
 from core.constants import USERNAME_MAX_LENGTH, EMAIL_MAX
 
 

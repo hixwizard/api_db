@@ -14,3 +14,6 @@ ROLE_CHOICES = {
 
 ROLE_CHOICES_LIST = [(key, value) for key, value in ROLE_CHOICES.items()]
 MESSAGE = 'Имя не должно содержать недопустимых символов.'
+MAX_ROLE_LENGTH = 20
+SCORE_MAX_VALUE = 10
+ADMIN_EMAIL = 'noreply@example.com'

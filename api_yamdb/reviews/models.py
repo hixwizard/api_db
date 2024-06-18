@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator
 from django.utils.timezone import now
 
-from core.constants import NAME_MAX, SLUG_MAX
+from core.constants import NAME_MAX, SLUG_MAX, SCORE_MAX_VALUE
 
 User = get_user_model()
 
@@ -111,7 +111,7 @@ class Review(models.Model):
     text = models.TextField(
         verbose_name='Текст отзыва',)
     score = models.PositiveIntegerField(
-        validators=[MaxValueValidator(10)],
+        validators=[MaxValueValidator(SCORE_MAX_VALUE)],
         verbose_name='Оценка',
     )
 
