@@ -2,7 +2,6 @@ import random
 from django.core.mail import send_mail
 from django.utils.timezone import now
 from rest_framework import serializers
-from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.validators import RegexValidator
 from django.core.cache import cache
