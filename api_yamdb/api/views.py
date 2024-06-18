@@ -1,8 +1,6 @@
-import random
 from django.db.models import Avg
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
-from django.core.mail import send_mail
 from django.core.cache import cache
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
@@ -30,7 +28,6 @@ from .permissons import (
     IsAdminOnly
 )
 from users.models import UserModel
-from core.constants import MIN_CODE, MAX_CODE, FIVE_MIN
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -119,43 +116,8 @@ class SignupView(views.APIView):
 
     def post(self, request):
         serializer = SignupSerializer(data=request.data)
-        email = request.data.get('email')
-        username = request.data.get('username')
-        if UserModel.objects.filter(email=email).exists():
-            if UserModel.objects.filter(username=username).exists():
-                return Response(
-                    {'detail': 'Пользователь уже зарегистрирован.'},
-                    status=status.HTTP_200_OK
-                )
-            else:
-                return Response(
-                    {'detail':
-                     'Пользователь с таким email уже зарегистрирован.'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-        serializer = SignupSerializer(data=request.data)
         if serializer.is_valid():
-            email = serializer.validated_data.get('email')
-            username = serializer.validated_data.get('username')
-            confirmation_code = str(random.randint(MIN_CODE, MAX_CODE))
-            cache_key = f'confirmation_code_{username}'
-            cache.set(cache_key, confirmation_code, timeout=FIVE_MIN)
-            user, created = UserModel.objects.get_or_create(
-                username=username,
-                email=email
-            )
-            if not created:
-                user.email = email
-                user.save()
-            user.confirmation_code = confirmation_code
-            user.save()
-            send_mail(
-                'Код подтверждения для входа.',
-                f'Ваш код подтверждения {confirmation_code}',
-                'noreply@example.com',
-                [email],
-                fail_silently=False,
-            )
+            user, created = serializer.save()
             return Response(
                 {'username': user.username, 'email': user.email},
                 status=status.HTTP_200_OK
@@ -195,14 +157,8 @@ class TokenView(views.APIView):
                 )
                 cache.delete(cache_key)
                 return Response(tokens, status=status.HTTP_200_OK)
-            else:
-                return Response(
-                    {'error': 'Неверный код подтверждения'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-        else:
-            return Response(
-                serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserViewSet(viewsets.ModelViewSet):

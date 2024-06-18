@@ -3,7 +3,8 @@ from django.core.validators import RegexValidator
 from django.db import models
 
 from core.constants import (
-    USERNAME_MAX_LENGTH, EMAIL_MAX, ROLE_CHOICES, ROLE_CHOICES_LIST
+    USERNAME_MAX_LENGTH, EMAIL_MAX, ROLE_CHOICES,
+    ROLE_CHOICES_LIST, MAX_ROLE_LENGTH
 )
 
 
@@ -22,7 +23,7 @@ class UserModel(AbstractUser):
     bio = models.TextField('Биография', blank=True)
     role = models.CharField(
         'роль',
-        max_length=20,
+        max_length=MAX_ROLE_LENGTH,
         choices=ROLE_CHOICES_LIST,
         default=ROLE_CHOICES['user'],
         blank=True
